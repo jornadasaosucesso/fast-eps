@@ -180,6 +180,32 @@ document.addEventListener("click",()=>{
   }
 },{once:true});
 </script>
+<script>
+(function () {
+  const dataLimite = new Date("2026-01-06T23:59:59");
+  const agora = new Date();
 
+  if (agora > dataLimite) {
+    document.body.innerHTML = `
+      <div style="
+        height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:#000;
+        color:#00eaff;
+        font-family:Arial;
+        text-align:center;
+        padding:30px;
+      ">
+        <div>
+          <h1>Sistema temporariamente desativado</h1>
+          <p>Entre em contato com o administrador.</p>
+        </div>
+      </div>
+    `;
+  }
+})();
+</script>
 </body>
 </html>
