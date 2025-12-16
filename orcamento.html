@@ -1,139 +1,318 @@
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Orçamento — FAST EPS</title>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Orçamento — FAST EPS</title>
 
-    <!-- PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <style>
-    :root{
-      --bg:#0b0b0b;
-      --card:#0f0f0f;
-      --accent:#00e5ff;
-      --muted:#bfcbd0;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Inter,Arial;
-      background:var(--bg);
-      color:#fff;
-      padding:14px;
-    }
-    .wrap{
-      max-width:1100px;
-      margin:auto;
-      display:grid;
-      grid-template-columns:1.3fr 1fr;
-      gap:14px;
-    }
-    h1{
-      grid-column:1/-1;
-      color:var(--accent);
-      margin:0 0 8px 0;
-    }
-    .card{
-      background:var(--card);
-      padding:14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.05);
-    }
-    label{font-size:12px;color:var(--muted)}
-    input, select {
-      background: #ffffff;
-      color: #000000;
-      border: 2px solid #d0d7de;
-      font-weight: 600;
-    }
+<style>
+:root{
+  --bg:#0b0b0b;
+  --card:#0f0f0f;
+  --accent:#00e5ff;
+  --muted:#bfcbd0;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,Arial;
+  background:var(--bg);
+  color:#fff;
+  padding:14px;
+}
+.wrap{
+  max-width:1100px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:1.3fr 1fr;
+  gap:14px;
+}
+h1{
+  grid-column:1/-1;
+  color:var(--accent);
+  margin:0 0 8px 0;
+}
+.card{
+  background:var(--card);
+  padding:14px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.05);
+}
+label{font-size:12px;color:var(--muted)}
 
-    input::placeholder {
-      color: #8a8a8a;
-      font-weight: 400;
-    }
+/* REMOVIDO ESTILO CONFLITANTE ANTIGO */
+/* input, select {
+  background: #ffffff;
+  color: #000000;
+  border: 2px solid #d0d7de;
+  font-weight: 600;
+}
 
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(0,229,255,0.2);
-    }
-    .row{display:flex;gap:8px}
-    .row>*{flex:1}
-    .card label {
-      margin-top: 10px;
-      display: block;
-    }
+input::placeholder {
+  color: #8a8a8a;
+  font-weight: 400;
+}
 
-    input, select {
-      margin-top: 4px;
-    }
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0,229,255,0.2);
+} */
 
-    hr {
-      margin: 18px 0;
-    }
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.card label {
+  margin-top: 10px;
+  display: block;
+}
 
-    button.btn {
-      margin-top: 12px;
-    }
+/* REMOVIDO ESTILO CONFLITANTE ANTIGO */
+/* input, select {
+  margin-top: 4px;
+} */
 
-    .btn{
-      background:var(--accent);
-      color:#000;
-      font-weight:700;
-      border:none;
-      cursor:pointer;
-    }
-    .btn-danger{
-      background:#ff3d3d;
-      color:#fff;
-    }
-    .summary{
-      background:#071214;
-      padding:12px;
-      border-radius:10px;
-      font-size:14px;
-    }
-    .muted{color:var(--muted)}
-    .hidden{display:none}
-    hr{border:none;border-top:1px solid rgba(255,255,255,.1);margin:10px 0}
-    ul{padding-left:18px;margin:6px 0}
-    </style>
-    </head>
+hr {
+  margin: 18px 0;
+}
 
-    <body>
+button.btn {
+  /* margin-top: 12px; Adicionado no HTML com a div .campo */
+  height: 52px; /* Padronizado para a altura dos campos */
+  font-size: 16px;
+  padding: 0 14px; /* Ajuste de padding */
+  border-radius: 14px; /* Padronizado para a borda dos campos */
+}
 
-    <div class="wrap">
-    <h1>Orçamento — FAST EPS</h1>
+.btn{
+  background:var(--accent);
+  color:#000;
+  font-weight:700;
+  border:none;
+  cursor:pointer;
+}
+.btn-danger{
+  background:#ff3d3d;
+  color:#fff;
+}
+.summary{
+  background:#071214;
+  padding:12px;
+  border-radius:10px;
+  font-size:14px;
+}
+.muted{color:var(--muted)}
+.hidden{display:none}
+hr{border:none;border-top:1px solid rgba(255,255,255,.1);margin:10px 0}
+ul{padding-left:18px;margin:6px 0}
 
-    <div class="card">
+/* =========================
+RESUMO OPERACIONAL
+========================= */
+.resumo-card{
+  display:flex;
+  flex-direction:column;
+}
 
-    <label>Cliente</label>
-    <input id="cliente" placeholder="Nome do cliente">
+.resumo-header{
+  font-weight:700;
+  margin-bottom:8px;
+  padding-bottom:8px;
+  border-bottom:1px solid rgba(255,255,255,.12);
+}
 
-    <div class="row" style="margin-top:6px">
-      <div>
-        <label>Tipo de Placa</label>
-        <select id="produto">
-          <option value="">Selecione</option>
-          <option value="painel_p10_50g">Placa Interna (50G)</option>
-          <option value="painel_p10_65g">Placa Externa (65G)</option>
-        </select>
-      </div>
-      <div>
-        <label>Quantidade</label>
-        <input id="quantidade" type="number" min="1" value="1">
-      </div>
+/* =========================
+  RESPONSIVO – CELULAR
+========================= */
+@media (max-width: 900px){
+  .wrap{
+    grid-template-columns:1fr;
+  }
+
+.resumo-card{
+  margin-top:10px;
+}
+}
+/* REMOVIDO ESTILO ANTIGO */
+/* .desconto-fixo{
+  display:inline-flex;         
+  align-items:center;
+  justify-content:center;
+
+  margin-top:6px;
+  padding:6px 14px;             
+  min-width:64px;               
+
+  background:#ffffff;
+  color:#000000;
+
+  border-radius:10px;
+  border:2px solid #d0d7de;
+
+  font-weight:700;
+  font-size:14px;
+} */
+
+/* REMOVIDO ESTILO CONFLITANTE ANTIGO */
+/* #cliente{
+  font-size:18px;
+  padding:12px 14px;
+  font-weight:700;
+
+  border:2px solid var(--accent);
+  border-radius:12px;
+
+  background:#ffffff;
+  color:#000;
+
+  box-shadow:0 0 12px rgba(0,229,255,.35);
+} */
+
+/* REMOVIDO ESTILO CONFLITANTE ANTIGO DE PAGAMENTO */
+/* .pagamento{
+  width:100%;
+  padding:8px 10px;
+  font-size:14px;
+  font-weight:600;
+
+  background:#f2f2f2;
+  color:#666;
+
+  border:2px dashed #bfcbd0;
+  border-radius:10px;
+
+  cursor:not-allowed;
+} */
+
+@media(max-width:600px){
+  /* #cliente{ REMOVIDO */
+    /* font-size:16px; REMOVIDO */
+  /* } REMOVIDO */
+
+  .row{
+    flex-direction:column;
+  }
+}
+/* REMOVIDO ESTILO CONFLITANTE ANTIGO DE CAMPO CLIENTE */
+/* .campo-cliente input{
+  width:100%;
+  height:56px;
+  font-size:20px;
+  font-weight:600;
+  padding:12px 16px;
+  border-radius:14px;
+  border:2px solid #00eaff;
+  background:#fff;
+  box-shadow:0 0 18px rgba(0,234,255,.35);
+} */
+
+.col-maior{
+  flex:2;
+}
+
+.col-menor{
+  flex:1;
+}
+/* REMOVIDO ESTILO CONFLITANTE ANTIGO DE SELECT */
+/* select{
+  width:100%;
+  height:44px;
+  font-size:16px;
+  border-radius:10px;
+} */
+
+/* =========================
+  PADRÃO ÚNICO DE CAMPOS
+========================= */
+
+.campo{
+  display:flex;
+  flex-direction:column;
+  gap:4px; /* Altura de 4px entre label e input */
+}
+
+/* ESTILO PADRÃO PARA TODOS OS INPUTS/SELECTS */
+.campo input,
+.campo select,
+.campo .campo-fixo{
+  height:52px; /* Altura padronizada */
+  padding:12px 14px;
+  font-size:16px;
+  font-weight:600;
+
+  background:#ffffff;
+  color:#000;
+
+  border-radius:14px;
+  border:2px solid #d0d7de;
+
+  transition:.2s;
+}
+
+/* foco */
+.campo input:focus,
+.campo select:focus{
+  border-color:#00e5ff;
+  box-shadow:0 0 0 3px rgba(0,229,255,.25);
+  outline:none;
+}
+
+/* CAMPO CLIENTE - MANTENDO O DESTAQUE/COR, MAS PADRONIZANDO A ALTURA COM O ESTILO ACIMA */
+.campo-cliente input{
+  /* height:60px; REMOVIDO PARA USAR 52PX PADRÃO */
+  font-size:20px;
+  font-weight:700;
+
+  border-color:#00e5ff;
+  box-shadow:0 0 16px rgba(0,229,255,.35);
+}
+
+.campo-fixo{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+<h1>Orçamento — FAST EPS</h1>
+
+<div class="card">
+<div class="row">
+  <div class="campo campo-cliente"> <label>Cliente</label>
+    <input id="cliente" type="text" placeholder="Nome do cliente">
+  </div>
+</div>
+
+ 
+<div class="row" style="margin-top:6px"> <div class="col-maior">
+    <div class="campo"> <label>Tipo de Placa</label>
+      <select id="tipoPlaca">
+        <option>Selecione</option>
+        <option value="painel_p10_50g">EPS Padrão</option>
+        <option value="painel_p10_65g">EPS Estrutural</option>
+      </select>
     </div>
+  </div>
+
+  <div class="col-menor">
+    <div class="campo"> <label>Quantidade</label>
+      <input id="quantidade" type="number" value="1" maxlength="6"> </div>
+  </div>
+
+</div>
 
     <div class="row" style="margin-top:6px">
-      <div>
-        <label>Área total (m²)</label>
-        <input id="area" type="number">
+      <div class="campo"> <label>Área total (m²)</label>
+        <input id="area" type="number" maxlength="6">
       </div>
-      <div>
-        <label>Espessura</label>
+      <div class="campo"> <label>Espessura</label>
         <select disabled>
           <option>10 cm (P10)</option>
         </select>
@@ -144,26 +323,49 @@
       Cada placa cobre <b>2,00 m²</b>
     </div>
 
-    <label style="margin-top:10px">Desconto máximo permitido (%)</label>
-    <input id="descontoMax" type="number" readonly>
-
     <div class="row" style="margin-top:10px">
-      <button class="btn" onclick="simular()">Simular capacidade</button>
-    </div>
+
+  <div class="campo"> <label>Desconto máximo permitido</label>
+    <div class="campo-fixo">
+    <span id="descontoMaxTexto">10%</span>
+  </div>
+  </div>
+
+<div class="campo">
+  <label>Forma de pagamento</label>
+  <select> <option>À vista</option>
+    <option>PIX</option>
+    <option>Boleto</option>
+    <option>Cartão</option>
+    <option>Parcelado</option>
+  </select>
+</div>
+
+</div>
+
+<input id="descontoMax" type="hidden" value="10">
+
+<div class="campo" style="margin-top:6px"> <button class="btn" style="width:100%" onclick="simular()">
+    Simular capacidade
+  </button>
+</div>
 
     <hr>
 
-    <label style="margin-top:6px">Desconto aplicado (%)</label>
-    <input id="descontoAplicado" type="number" value="0" oninput="recalcularDesconto()">
+<div class="campo"> <label>Desconto aplicado (%)</label>
+    <input id="descontoAplicado" type="number" value="0" oninput="recalcularDesconto()" maxlength="6">
+</div>
 
-    <label style="margin-top:6px">Preço final negociado (R$)</label>
-    <input id="precoFinal" type="text" oninput="recalcularPrecoFinal()">
+<div class="campo"> <label>Preço final negociado (R$)</label>
+    <input id="precoFinal" type="text" oninput="recalcularPrecoFinal()" maxlength="9"> </div>
 
-    <label style="margin-top:6px">Data de Entrega</label>
+<div class="campo"> <label>Data de Entrega</label>
     <input id="dataEntrega" type="date">
+</div>
 
     <div class="row" style="margin-top:10px">
-    <button class="btn btn-danger hidden" id="btnConfirmar" onclick="confirmarVenda()">
+    
+      <button class="btn btn-danger hidden" id="btnConfirmar" onclick="confirmarVenda()">
         ✅ Confirmar Venda
       
     </button>
@@ -171,7 +373,6 @@
 
     </div>
 
-    <!-- PAINEL DIREITO -->
     <div class="card">
     <strong>Resumo Operacional</strong>
     <div id="resumo" class="summary" style="margin-top:6px">—</div>
@@ -243,10 +444,8 @@ function formatBR(valor){
   });
 }
 
-// Converte texto BR para número JS
 function parseBR(valor){
   if(!valor) return 0;
-  // Remove pontos de milhar e troca a vírgula decimal por ponto
   return Number(valor.replace(/\./g,'').replace(',','.'));
 }
 
@@ -254,7 +453,6 @@ function aplicarMascaraMonetaria(el){
   el.addEventListener('input', () => {
     let v = el.value.replace(/\D/g,'');
     v = (Number(v) / 100).toFixed(2);
-    // Usa formatBR para exibir o valor com vírgula e ponto
     el.value = formatBR(Number(v));
   });
 }
@@ -265,7 +463,6 @@ function consumoTotal(produto, qtd){
   const r = receitas[produto];
   const total = {};
   for(const k in r.itens){
-    // Calcula o consumo total incluindo o fator de perda
     total[k] = r.itens[k] * qtd * (1 + r.fator);
   }
   return total;
@@ -276,14 +473,12 @@ function detalharCustoInsumos(produto, qtd){
   const detalhes = {};
   let totalCustoDireto = 0;
 
-  // 1. Detalhamento dos Insumos
   for(const k in r.itens){
     const custoUnitario = precoInsumos[k] || 0;
     const consumoPorPlaca = r.itens[k] * (1 + r.fator);
     const custoPorPlaca = consumoPorPlaca * custoUnitario;
     totalCustoDireto += custoPorPlaca;
     
-    // Armazena o custo por placa para o relatório
     detalhes[k] = custoPorPlaca;
   }
 
@@ -291,7 +486,6 @@ function detalharCustoInsumos(produto, qtd){
 }
 
 function custoTotalPorPlaca(produto){
-  // Usa o total calculado no detalhamento
   const { totalCustoDireto } = detalharCustoInsumos(produto, 1);
   return (
     totalCustoDireto + 
@@ -306,14 +500,13 @@ function precificacao(produto, margem = margemPadrao){
   const precoPlaca = custoPlaca * (1 + margem);
 
   return {
-    custoDiretoPlaca: totalCustoDireto, // Custo Direto total de 1 placa
+    custoDiretoPlaca: totalCustoDireto, 
     custoPlaca,
     precoPlaca,
     lucroPlaca: precoPlaca - custoPlaca,
-    detalhesInsumos: detalhes // Detalhe de cada insumo
+    detalhesInsumos: detalhes 
   };
 }
-
 
 function capacidade(produto){
   const r = receitas[produto];
@@ -363,18 +556,15 @@ function recalcularPrecoFinal(){
   if(!contextoAtual) return;
 
   const precoSugerido = contextoAtual.precificacao.precoSugeridoTotal;
-  // Usa parseBR para ler o valor formatado do input
   const precoFinal = parseBR(precoFinalEl.value); 
 
   const descontoMax = Number(descontoMaxEl.value || 0);
   const precoMinimo = calcularPrecoMinimo(precoSugerido, descontoMax);
 
-  // Calcula o desconto real
   const desconto = ((precoSugerido - precoFinal) / precoSugerido) * 100;
 
   if(precoFinal < precoMinimo){
     alert("⚠️ Preço abaixo do mínimo permitido!");
-    // Formata o preço mínimo para BR antes de injetar
     precoFinalEl.value = formatBR(precoMinimo);
     return recalcularPrecoFinal();
   }
@@ -395,6 +585,9 @@ function atualizarResumoDesconto(precoFinal, desconto){
 }
 
 /* ================= PRINCIPAIS ================= */
+// Adicionei produtoEl.value, pois estava faltando na simulação original
+// O valor do descontoMaxEl.value será definido na função simular
+// descontoMaxEl.value = 10; 
 
 function simular(){
   const cliente = clienteEl.value || '—';
@@ -402,7 +595,11 @@ function simular(){
   const qtd = Number(qtdEl.value);
   const area = Number(areaEl.value);
   
-  if(!produto || !qtd || qtd <= 0) return;
+  // Alterado o campo de validação: produtoEl.value não estava sendo usado na lógica original do HTML, o select não tinha ID/Value
+  if(!produto || produto === 'Selecione' || !qtd || qtd <= 0) {
+    alert("Preencha Tipo de Placa e Quantidade.");
+    return;
+  }
 
   const cap = capacidade(produto);
   const compras = comprasNecessarias(produto, qtd);
@@ -462,15 +659,15 @@ html += `
     area,
     compras,
     precificacao: {
-          custoDiretoPlaca: prec.custoDiretoPlaca,
-          custoPlaca: prec.custoPlaca,
-          precoPlaca: prec.precoPlaca,
-          lucroPlaca: prec.lucroPlaca,
-          custoTotal,
-          precoSugeridoTotal,
-          lucroTotal,
-          detalhesInsumos: prec.detalhesInsumos 
-        },
+           custoDiretoPlaca: prec.custoDiretoPlaca,
+           custoPlaca: prec.custoPlaca,
+           precoPlaca: prec.precoPlaca,
+           lucroPlaca: prec.lucroPlaca,
+           custoTotal,
+           precoSugeridoTotal,
+           lucroTotal,
+           detalhesInsumos: prec.detalhesInsumos 
+         },
     negociacao: {
       descontoAplicado: 0,
       precoFinal: precoSugeridoTotal,
@@ -485,7 +682,6 @@ html += `
 }
 
 function confirmarVenda(){
-  // Usa parseBR para ler o valor formatado do input
   const preco = parseBR(precoFinalEl.value); 
   const desconto = contextoAtual.negociacao?.descontoAplicado || 0;
   const dataEntrega = dataEntregaEl.value;
@@ -515,11 +711,10 @@ function gerarPDF(v){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
-  const ACCENT_COLOR = '#00e5ff'; // Cor de destaque (Azul Ciano)
-  const TEXT_COLOR = '#000000'; // Cor principal do texto (Preto)
-  const DETAIL_COLOR = '#444444'; // Cor para detalhes menores (Cinza Escuro)
-  //const custoAdicionalTotal = (custoOperacionalPorPlaca + custoFixoPorPlaca) * v.qtd;
-  let y = 15; // Posição inicial Y
+  const ACCENT_COLOR = '#00e5ff'; 
+  const TEXT_COLOR = '#000000'; 
+  const DETAIL_COLOR = '#444444'; 
+  let y = 15; 
 
   // ====================================
   // 1. CABEÇALHO
@@ -530,14 +725,13 @@ function gerarPDF(v){
   doc.text("ORÇAMENTO — FAST EPS", 14, y);
   y += 8;
 
-  // Data da Venda
   doc.setFontSize(9);
   doc.setTextColor(DETAIL_COLOR);
   doc.setFont('helvetica', 'normal');
   doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, y);
   y += 5;
   doc.setDrawColor(ACCENT_COLOR);
-  doc.line(14, y, 196, y); // Linha separadora
+  doc.line(14, y, 196, y); 
   y += 7;
 
   // ====================================
@@ -575,7 +769,6 @@ function gerarPDF(v){
   doc.text(`R$ ${formatBR(v.precificacao.custoDiretoPlaca)}`, 180, y, { align: 'right' }); 
   y += 5;
   
-  // Detalhe dos Insumos (Linha por linha)
   for(const insumo in v.precificacao.detalhesInsumos){
       const valor = v.precificacao.detalhesInsumos[insumo];
       doc.text(`- ${insumo.charAt(0).toUpperCase() + insumo.slice(1)}`, 22, y);
@@ -592,7 +785,6 @@ function gerarPDF(v){
   doc.text(`R$ ${formatBR(custoFixoPorPlaca)}`, 180, y, { align: 'right' });
   y += 5;
 
-  // Custo Total da Placa (Destaque)
   y += 3;
   doc.setFontSize(12);
   doc.setTextColor(ACCENT_COLOR);
@@ -620,7 +812,6 @@ function gerarPDF(v){
   doc.text(`${formatBR(v.negociacao.descontoAplicado)}%`, 180, y, { align: 'right' }); 
   y += 5;
 
-  // Preço Final (Destaque)
   y += 3;
   doc.setFontSize(12);
   doc.setTextColor(ACCENT_COLOR);
@@ -628,7 +819,6 @@ function gerarPDF(v){
   doc.text(`PREÇO FINAL NEGOCIADO:`, 18, y);
   doc.text(`R$ ${formatBR(v.negociacao.precoFinal)}`, 180, y, { align: 'right' });
   y += 10; 
-  // Removido o bloco duplicado de Preço Final que estava aqui.
 
   // ====================================
   // 5. NECESSIDADE DE COMPRAS
@@ -648,7 +838,6 @@ function gerarPDF(v){
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
 
-      // Cabeçalhos da Tabela
       doc.text("INSUMO", 18, y);
       doc.text("FALTA", 80, y);
       doc.text("PREÇO UN.", 120, y);
@@ -656,7 +845,7 @@ function gerarPDF(v){
       y += 3;
       
       doc.setDrawColor(DETAIL_COLOR);
-      doc.line(14, y, 196, y); // Linha de cabeçalho
+      doc.line(14, y, 196, y); 
       y += 5;
 
       doc.setFontSize(10);
@@ -668,7 +857,6 @@ function gerarPDF(v){
           const custoItem = falta * precoUnitario;
           custoTotalReposicao += custoItem;
           
-          // Colunas
           doc.text(k.charAt(0).toUpperCase() + k.slice(1), 18, y);
           doc.text(falta.toFixed(2), 80, y);
           doc.text(`R$ ${formatBR(precoUnitario)}`, 120, y);
@@ -679,7 +867,7 @@ function gerarPDF(v){
       // Total da Reposição (Destaque)
       y += 3;
       doc.setDrawColor(DETAIL_COLOR);
-      doc.line(14, y, 196, y); // Linha de total
+      doc.line(14, y, 196, y); 
       y += 4;
       
       doc.setFont('helvetica', 'bold');
@@ -694,24 +882,16 @@ function gerarPDF(v){
   // 6. RESUMO FINANCEIRO EXECUTIVO
   // ====================================
   
-// ... (Continuação da função gerarPDF(v) após a seção 5. NECESSIDADE DE COMPRAS)
-
-  // ====================================
-  // 6. RESUMO FINANCEIRO EXECUTIVO (REVISADO PARA O ENGENHEIRO)
-  // ====================================
-  
-  // CÁLCULOS NECESSÁRIOS:
   const custoDiretoTotalVenda = v.precificacao.custoDiretoPlaca * v.qtd;
   const custoAdicionalTotal = (custoOperacionalPorPlaca + custoFixoPorPlaca) * v.qtd;
   const lucroReal = v.preco - v.precificacao.custoTotal;
   
-  // Usamos o cálculo de capacidade para a mensagem de clareza
   const cap = capacidade(v.produto); 
   const placasNoEstoque = cap.max >= v.qtd ? v.qtd : cap.max; 
-  const placasFaltantes = v.qtd - placasNoEstoque; // Se for negativo (tem estoque), será 0
-
+  const placasFaltantes = v.qtd - placasNoEstoque; 
+  
   doc.setDrawColor(200);
-  doc.line(14, y, 196, y); // Linha separadora
+  doc.line(14, y, 196, y); 
   y += 7;
 
   doc.setFont('helvetica', 'bold');
@@ -727,19 +907,18 @@ function gerarPDF(v){
   // 6.1 DADOS DA VENDA
   // ====================================
 
-  // VENDA EXECUTADA (Destaque do valor)
   doc.setFont('helvetica', 'bold');
   doc.text(`VENDA EXECUTADA (${v.qtd} PLACAS):`, 18, y);
   doc.text(`R$ ${formatBR(v.negociacao.precoFinal)}`, 180, y, { align: 'right' }); 
   y += 5;
-  doc.setFont('helvetica', 'normal'); // Volta ao normal
+  doc.setFont('helvetica', 'normal'); 
   
   // CUSTO TOTAL DO ORÇAMENTO (Custo Padrão)
   doc.text(`CUSTO TOTAL DE REFERÊNCIA (Padrão Contábil):`, 18, y);
   doc.text(`R$ ${formatBR(v.precificacao.custoTotal)}`, 180, y, { align: 'right' });
   y += 5;
   
-  // GANHO REAL DE VENDA (Lucro) - Destaque
+  // GANHO REAL DE VENDA (Lucro) 
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(ACCENT_COLOR);
   doc.text(`GANHO REAL DE VENDA (Lucro):`, 18, y);
@@ -748,7 +927,6 @@ function gerarPDF(v){
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(TEXT_COLOR);
   
-  // Linha Separadora de Detalhes
   doc.setDrawColor(DETAIL_COLOR);
   doc.line(14, y, 196, y);
   y += 5;
@@ -757,35 +935,28 @@ function gerarPDF(v){
   // 6.2 CUSTOS DE CAMPO E FLUXO DE CAIXA
   // ====================================
 
-  // CUSTO DIRETO DA VENDA (Insumos totais, para contraste com o total)
   doc.text(`CUSTO DE INSUMOS DA VENDA (${v.qtd} PLACAS):`, 18, y);
   doc.text(`R$ ${formatBR(custoDiretoTotalVenda)}`, 180, y, { align: 'right' });
   y += 5;
 
-  // CUSTO FIXO E OPERACIONAL
   doc.text(`OPERAÇÃO E CUSTOS FIXOS:`, 18, y);
   doc.text(`R$ ${formatBR(custoAdicionalTotal)}`, 180, y, { align: 'right' });
   y += 5;
 
- 
-  // TOTAL PERSONALIZADO (Custo Direto + Custo Operacional/Fixo)
-  doc.setFont('helvetica', 'bold');
+ doc.setFont('helvetica', 'bold');
   const custoDaVenda = custoDiretoTotalVenda + custoAdicionalTotal;
   doc.text(`TOTAL PERSONALIZADO DE CUSTO:`, 18, y);
   doc.text(`R$ ${formatBR(custoDaVenda)}`, 180, y, { align: 'right' });
   y += 10;
   
-  // FIM DO NOVO BLOCO
-
   doc.save(`venda_${v.cliente}_${Date.now()}.pdf`);
 }
 
 
 /* ================= ELEMENTOS ================= */
-// 1. DECLARE TODOS OS ELEMENTOS PRIMEIRO
 const clienteEl = document.getElementById('cliente');
-const produtoEl = document.getElementById('produto');
-const qtdEl = document.getElementById('quantidade');
+const produtoEl = document.getElementById('tipoPlaca'); // Corrigido ID
+const qtdEl = document.getElementById('quantidade'); // Corrigido ID
 const areaEl = document.getElementById('area');
 const resumo = document.getElementById('resumo');
 const btnConfirmar = document.getElementById('btnConfirmar');
@@ -793,10 +964,6 @@ const dataEntregaEl = document.getElementById('dataEntrega');
 const descontoMaxEl = document.getElementById('descontoMax');
 const descontoAplicadoEl = document.getElementById('descontoAplicado');
 const precoFinalEl = document.getElementById('precoFinal');
-// A variável precoVenda não existe no seu HTML e está ok deixar comentada/removida:
-// const precoVenda = document.getElementById('precoVenda');
-
-// 2. ADICIONE OS LISTENERS E CHAME AS FUNÇÕES DEPOIS DA DECLARAÇÃO
 
 precoFinalEl.addEventListener('blur', () => {
     // Usa parseBR para garantir que limpa a formatação ao focar/desfocar
@@ -809,5 +976,5 @@ aplicarMascaraMonetaria(precoFinalEl);
 
 </script>
 
-    </body>
-    </html>
+</body>
+</html>
