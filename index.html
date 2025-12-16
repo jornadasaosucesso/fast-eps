@@ -23,12 +23,12 @@ body{
 /* =====================================================
    IMAGEM DE FUNDO (QUASE INVISÍVEL)
 ===================================================== */
-.bg-image{
-  position:fixed;
-  inset:0;
-  background:url("imagens/fast-eps.png") center/cover no-repeat;
-  opacity:0.40;               /* 🔥 controla transparência */
-  z-index:-3;
+.body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:
+    linear-gradient(rgba(255,255,255,0.96), rgba(255,255,255,0.96)),
+    url("imagens/fast-eps.png") center/cover no-repeat fixed;
 }
 
 /* camada escura para contraste */
@@ -74,7 +74,7 @@ body{
   width:100%;
   padding:14px 0;
 
-  font-size:26px;   /* ⬅️ AQUI aumenta a fonte */
+  font-size:22px;   /* ⬅️ AQUI aumenta a fonte */
   font-weight:700;
   letter-spacing:3px;
 
@@ -84,7 +84,6 @@ body{
   text-shadow:0 0 10px rgba(0,255,255,.9);
   pointer-events:none;
 }
-
 
 /* POSIÇÕES FIXAS */
 .top-left{ top:20px; left:20px; }

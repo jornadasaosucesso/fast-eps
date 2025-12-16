@@ -3,183 +3,204 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Fluxo Financeiro - EPS</title>
+<title>Fluxo Financeiro - FAST EPS</title>
 
 <style>
-    * {
-    box-sizing: border-box;
-    }
+*{
+  box-sizing:border-box;
+}
 
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #eef1f5;
-    }
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#eef1f5;
+}
 
-    header {
-        background: #1a1a1a;
-        padding: 14px;
-        color: #00e5ff;
-        font-size: 20px;
-        text-align: center;
-        font-weight: bold;
-    }
+/* ================= HEADER ================= */
+header{
+  background:#1a1a1a;
+  padding:14px;
+  color:#00e5ff;
+  font-size:20px;
+  text-align:center;
+  font-weight:bold;
+}
 
-    .container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 16px;
-    }
+/* ================= CONTAINER ================= */
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:16px;
+}
 
+/* ================= CARDS ================= */
+.cards{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  gap:20px;
+  margin-bottom:25px;
+}
 
-    .cards {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-        margin-bottom: 25px;
-    }
+.card{
+  background:white;
+  padding:22px;
+  border-radius:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,.15);
+  cursor:pointer;
+  transition:.2s;
+  text-align:center;
+  font-size:18px;
+  font-weight:bold;
+}
 
-    .card {
-        background: white;
-        padding: 22px;
-        border-radius: 12px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-        cursor: pointer;
-        transition: 0.2s;
-        text-align: center;
-        font-size: 18px;
-        font-weight: bold;
-    }
+.card:hover{
+  transform:scale(1.05);
+}
 
-    .card:hover {
-        transform: scale(1.05);
-    }
+.card-small{
+  font-size:14px;
+  font-weight:normal;
+  color:#666;
+  margin-top:6px;
+}
 
-    .card-small {
-        font-size: 14px;
-        font-weight: normal;
-        color: #666;
-        margin-top: 6px;
-    }
+/* ================= TABELA ================= */
+.section-title{
+  margin-top:25px;
+  margin-bottom:10px;
+  font-size:22px;
+  font-weight:bold;
+  color:#222;
+}
 
-    table {
-        width: 100%;
-        background: white;
-        border-collapse: collapse;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        margin-top: 25px;
-    }
+.table-wrap{
+  overflow-x:auto;
+}
 
-    th, td {
-        padding: 12px;
-        text-align: left;
-        border-bottom: 1px solid #eaeaea;
-    }
+table{
+  width:100%;
+  min-width:700px;
+  background:white;
+  border-collapse:collapse;
+  border-radius:8px;
+  overflow:hidden;
+  box-shadow:0 2px 5px rgba(0,0,0,.1);
+}
 
-    th {
-        background: #1a1a1a;
-        color: #fff;
-    }
+th, td{
+  padding:12px;
+  text-align:left;
+  border-bottom:1px solid #eaeaea;
+  white-space:nowrap;
+}
 
-    tr:hover {
-        background: #f7f9fc;
-    }
+th{
+  background:#1a1a1a;
+  color:white;
+}
 
-    .section-title {
-        margin-top: 25px;
-        margin-bottom: 10px;
-        font-size: 22px;
-        font-weight: bold;
-        color: #222;
-    }
+tr:hover{
+  background:#f7f9fc;
+}
 
+/* ================= RESPONSIVO ================= */
+@media(max-width:600px){
+
+  header{
+    font-size:16px;
+  }
+
+  .card{
+    font-size:16px;
+    padding:18px;
+  }
+
+  .section-title{
+    font-size:18px;
+  }
+
+  th, td{
+    font-size:14px;
+    padding:10px;
+  }
+}
 </style>
 </head>
+
 <body>
 
 <header>Fluxo Financeiro</header>
 
 <div class="container">
 
-    <!-- CARDS DE AÇÕES RÁPIDAS -->
-    <div class="cards">
+  <!-- CARDS -->
+  <div class="cards">
 
-        <div class="card" onclick="msg('Contas a Receber')">
-            Contas a Receber
-            <div class="card-small">Registrar recebimentos e duplicatas</div>
-        </div>
-
-        <div class="card" onclick="msg('Contas a Pagar')">
-            Contas a Pagar
-            <div class="card-small">Gerenciar despesas e boletos</div>
-        </div>
-
-        <div class="card" onclick="msg('Fluxo de Caixa')">
-            Fluxo de Caixa
-            <div class="card-small">Visualizar entradas x saídas</div>
-        </div>
-
-        <div class="card" onclick="msg('Extratos e Conciliação')">
-            Extratos e Conciliação
-            <div class="card-small">Conferência bancária</div>
-        </div>
-
-        <div class="card" onclick="msg('Centro de Custos')">
-            Centro de Custos
-            <div class="card-small">Classificação financeira</div>
-        </div>
-
-        <div class="card" onclick="msg('Relatórios Financeiros')">
-            Relatórios Financeiros
-            <div class="card-small">Demonstrativos e análises</div>
-        </div>
-
-        <div class="card" onclick="msg('Faturamento')">
-            Faturamento
-            <div class="card-small">Emissão de notas e recibos</div>
-        </div>
-
-        <div class="card" onclick="msg('Movimentações')">
-            Movimentações
-            <div class="card-small">Histórico completo</div>
-        </div>
-
+    <div class="card" onclick="msg('Contas a Receber')">
+      Contas a Receber
+      <div class="card-small">Entradas previstas e realizadas</div>
     </div>
 
-    <!-- TABELA DEMONSTRATIVA -->
-    <div class="section-title">Últimas Movimentações Financeiras</div>
+    <div class="card" onclick="msg('Contas a Pagar')">
+      Contas a Pagar
+      <div class="card-small">Despesas, fornecedores e boletos</div>
+    </div>
 
+    <div class="card" onclick="msg('Fluxo de Caixa')">
+      Fluxo de Caixa
+      <div class="card-small">Entradas x Saídas</div>
+    </div>
+
+    <div class="card" onclick="msg('Centro de Custos')">
+      Centro de Custos
+      <div class="card-small">Produção, obras e administrativo</div>
+    </div>
+
+    <div class="card" onclick="msg('Faturamento')">
+      Faturamento
+      <div class="card-small">Notas, recibos e vendas</div>
+    </div>
+
+    <div class="card" onclick="msg('Relatórios Financeiros')">
+      Relatórios
+      <div class="card-small">Análises e demonstrativos</div>
+    </div>
+
+  </div>
+
+  <!-- TABELA -->
+  <div class="section-title">Últimas Movimentações Financeiras</div>
+
+  <div class="table-wrap">
     <table>
-        <thead>
-            <tr>
-                <th>Data</th>
-                <th>Descrição</th>
-                <th>Categoria</th>
-                <th>Tipo</th>
-                <th>Valor</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            <tr>
-                <td>—</td>
-                <td>Aguardando integração...</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-            </tr>
-        </tbody>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Descrição</th>
+          <th>Categoria</th>
+          <th>Tipo</th>
+          <th>Valor</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>—</td>
+          <td>Aguardando integração...</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+      </tbody>
     </table>
+  </div>
 
 </div>
 
 <script>
-function msg(nome) {
-    alert(nome + " — função em desenvolvimento.");
+function msg(nome){
+  alert(nome + " — módulo em desenvolvimento.");
 }
 </script>
 
