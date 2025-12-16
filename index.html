@@ -19,8 +19,8 @@ body{
   color:#fff;
   overflow:hidden;
   background:
-    linear-gradient(rgba(255,255,255,0.96), rgba(255,255,255,0.96)),
-    url("imagens/fast-eps.png") center/cover no-repeat fixed;
+    url("./imagens/fast-eps.png") center/cover no-repeat fixed,
+    linear-gradient(rgba(255,255,255,0.6), rgba(255,255,255,0.6));
 }
 
 /* =====================================================
@@ -68,7 +68,7 @@ body{
   width:100%;
   padding:12px 0;
 
-  font-size:clamp(10px, 2.6vw, 22px);
+  font-size:clamp(14px, 3.5vw, 32px); /* aumentei limites */
   font-weight:700;
   letter-spacing:2px;
 
@@ -134,7 +134,8 @@ body{
   }
 
   .card-btn .label{
-    padding:8px 0;
+    font-size:20px;   /* força tamanho fixo maior no celular */
+    padding:10px 0;
     letter-spacing:1px;
   }
 }
