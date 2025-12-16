@@ -1,0 +1,40 @@
+{
+"painel_p10_50g": {
+"nome": "Painel EPS P10 50G",
+"descricao": "Painel estrutural 10 cm com tela 50G",
+"fator_perda": 0.07,
+"itens": {
+"eps_15": 15,
+"tela_50g": 1.1,
+"cimento_cpv": 48,
+"areia_media": 18,
+"aditivo_plastificante": 20,
+"conectores": 0.8
+},
+"custos_operacionais": {
+"energia": 2.3,
+"mao_obra": 7.5,
+"manutencao": 1.4
+}
+},
+
+
+"painel_p10_65g": {
+"nome": "Painel EPS P10 65G",
+"descricao": "Painel estrutural 10 cm com tela 65G",
+"fator_perda": 0.08,
+"itens": {
+"eps_15": 15,
+"tela_65g": 1.1,
+"cimento_cpv": 50,
+"areia_media": 19,
+"aditivo_plastificante": 22,
+"conectores": 1
+},
+"custos_operacionais": {
+"energia": 2.5,
+"mao_obra": 7.8,
+"manutencao": 1.6
+}
+}
+}

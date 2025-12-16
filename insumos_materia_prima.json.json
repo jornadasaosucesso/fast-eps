@@ -1,0 +1,50 @@
+{
+"areia_fina": {
+"nome": "Areia Fina",
+"unidade_compra": "m3",
+"unidade_estoque": "litro",
+"fator_conversao": 1000,
+"preco_unitario_compra": 110.00,
+"data_atualizacao": "2025-12-09"
+},
+"tela_50g": {
+"nome": "Tela 50G",
+"unidade_compra": "m2",
+"unidade_estoque": "m2",
+"fator_conversao": 1,
+"preco_unitario_compra": 6.80,
+"data_atualizacao": "2025-12-09"
+},
+"tela_65g": {
+"nome": "Tela 65G",
+"unidade_compra": "m2",
+"unidade_estoque": "m2",
+"fator_conversao": 1,
+"preco_unitario_compra": 8.20,
+"data_atualizacao": "2025-12-09"
+},
+"aditivo_plastificante": {
+"nome": "Aditivo Plastificante",
+"unidade_compra": "litro",
+"unidade_estoque": "ml",
+"fator_conversao": 1000,
+"preco_unitario_compra": 18.00,
+"data_atualizacao": "2025-12-09"
+},
+"aditivo_impermeabilizante": {
+"nome": "Aditivo Impermeabilizante",
+"unidade_compra": "litro",
+"unidade_estoque": "ml",
+"fator_conversao": 1000,
+"preco_unitario_compra": 22.00,
+"data_atualizacao": "2025-12-09"
+},
+"conectores": {
+"nome": "Conectores Aço",
+"unidade_compra": "un",
+"unidade_estoque": "un",
+"fator_conversao": 1,
+"preco_unitario_compra": 1.90,
+"data_atualizacao": "2025-12-09"
+}
+}

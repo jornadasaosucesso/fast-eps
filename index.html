@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu FAST EPS</title>
+
+<style>
+/* =====================================================
+   RESET E BASE
+===================================================== */
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  color:#fff;
+  overflow:hidden;
+}
+
+/* =====================================================
+   IMAGEM DE FUNDO (QUASE INVISÍVEL)
+===================================================== */
+.bg-image{
+  position:fixed;
+  inset:0;
+  background:url("imagens/fast-eps.png") center/cover no-repeat;
+  opacity:0.40;               /* 🔥 controla transparência */
+  z-index:-3;
+}
+
+/* camada escura para contraste */
+.bg-overlay{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle at center, #000 40%, #000 85%);
+  z-index:-2;
+}
+
+/* =====================================================
+   BOTÕES DE CANTO (20% MAIORES)
+===================================================== */
+.card-btn{
+  position:fixed;
+  width:264px;   /* 220 + 20% */
+  height:264px;
+  background:rgba(0,0,0,.55);
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:0 0 18px rgba(0,255,255,.45);
+  cursor:pointer;
+  transition:.25s;
+  z-index:5;
+}
+
+.card-btn:hover{
+  transform:scale(1.08);
+  box-shadow:0 0 40px rgba(0,255,255,.8);
+}
+
+.card-btn video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* TEXTO SOBRE OS VÍDEOS */
+.card-btn .label{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  padding:14px 0;
+
+  font-size:26px;   /* ⬅️ AQUI aumenta a fonte */
+  font-weight:700;
+  letter-spacing:3px;
+
+  color:#fff;
+  background:linear-gradient(to top, rgba(0,0,0,.75), rgba(0,0,0,.05));
+  text-align:center;
+  text-shadow:0 0 10px rgba(0,255,255,.9);
+  pointer-events:none;
+}
+
+
+/* POSIÇÕES FIXAS */
+.top-left{ top:20px; left:20px; }
+.top-right{ top:20px; right:20px; }
+.bottom-left{ bottom:20px; left:20px; }
+.bottom-right{ bottom:20px; right:20px; }
+
+/* =====================================================
+   VÍDEO CENTRAL (20% MAIOR / SEM TEXTO)
+===================================================== */
+.centro-video{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  width:504px;   /* 420 + 20% */
+  height:504px;
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:0 0 35px rgba(0,255,255,.5);
+  z-index:4;
+}
+
+.centro-video video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* =====================================================
+   RESPONSIVO
+===================================================== */
+@media(max-width:1024px){
+  .card-btn{
+    width:210px;
+    height:210px;
+  }
+
+  .centro-video{
+    width:380px;
+    height:380px;
+  }
+}
+
+@media(max-width:600px){
+  .card-btn{
+    width:140px;
+    height:140px;
+  }
+
+  .centro-video{
+    width:240px;
+    height:240px;
+  }
+
+  .card-btn::after{
+    font-size:12px;
+    padding:8px 0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- IMAGEM DE FUNDO -->
+<div class="bg-image"></div>
+<div class="bg-overlay"></div>
+
+<!-- BOTÕES NOS CANTOS -->
+<div class="card-btn top-left" onclick="location.href='orcamento.html'">
+  <video src="imagens/orcamento.mp4" autoplay muted loop playsinline></video>
+  <span class="label">ORÇAMENTO</span>
+</div>
+
+<div class="card-btn bottom-left" onclick="location.href='estoque.html'">
+  <video src="imagens/estoque.mp4" autoplay muted loop playsinline></video>
+  <span class="label">ESTOQUE</span>
+</div>
+
+<div class="card-btn top-right" onclick="location.href='fluxo_financeiro.html'">
+  <video src="imagens/financeiro.mp4" autoplay muted loop playsinline></video>
+  <span class="label">FINANCEIRO</span>
+</div>
+
+<div class="card-btn bottom-right" onclick="location.href='sair.html'">
+  <video src="imagens/saida.mp4" autoplay muted loop playsinline></video>
+    <span class="label">SAIDA</span>
+
+</div>
+
+<!-- VÍDEO CENTRAL -->
+<div class="centro-video">
+  <video src="imagens/fast_002.mp4" autoplay muted loop playsinline></video>
+</div>
+
+<script>
+/* Tenta fullscreen na primeira interação */
+document.addEventListener("click",()=>{
+  if(document.documentElement.requestFullscreen){
+    document.documentElement.requestFullscreen();
+  }
+},{once:true});
+</script>
+
+</body>
+</html>

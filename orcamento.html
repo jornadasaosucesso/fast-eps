@@ -1,0 +1,813 @@
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Orçamento — FAST EPS</title>
+
+    <!-- PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+    :root{
+      --bg:#0b0b0b;
+      --card:#0f0f0f;
+      --accent:#00e5ff;
+      --muted:#bfcbd0;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,Arial;
+      background:var(--bg);
+      color:#fff;
+      padding:14px;
+    }
+    .wrap{
+      max-width:1100px;
+      margin:auto;
+      display:grid;
+      grid-template-columns:1.3fr 1fr;
+      gap:14px;
+    }
+    h1{
+      grid-column:1/-1;
+      color:var(--accent);
+      margin:0 0 8px 0;
+    }
+    .card{
+      background:var(--card);
+      padding:14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.05);
+    }
+    label{font-size:12px;color:var(--muted)}
+    input, select {
+      background: #ffffff;
+      color: #000000;
+      border: 2px solid #d0d7de;
+      font-weight: 600;
+    }
+
+    input::placeholder {
+      color: #8a8a8a;
+      font-weight: 400;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0,229,255,0.2);
+    }
+    .row{display:flex;gap:8px}
+    .row>*{flex:1}
+    .card label {
+      margin-top: 10px;
+      display: block;
+    }
+
+    input, select {
+      margin-top: 4px;
+    }
+
+    hr {
+      margin: 18px 0;
+    }
+
+    button.btn {
+      margin-top: 12px;
+    }
+
+    .btn{
+      background:var(--accent);
+      color:#000;
+      font-weight:700;
+      border:none;
+      cursor:pointer;
+    }
+    .btn-danger{
+      background:#ff3d3d;
+      color:#fff;
+    }
+    .summary{
+      background:#071214;
+      padding:12px;
+      border-radius:10px;
+      font-size:14px;
+    }
+    .muted{color:var(--muted)}
+    .hidden{display:none}
+    hr{border:none;border-top:1px solid rgba(255,255,255,.1);margin:10px 0}
+    ul{padding-left:18px;margin:6px 0}
+    </style>
+    </head>
+
+    <body>
+
+    <div class="wrap">
+    <h1>Orçamento — FAST EPS</h1>
+
+    <div class="card">
+
+    <label>Cliente</label>
+    <input id="cliente" placeholder="Nome do cliente">
+
+    <div class="row" style="margin-top:6px">
+      <div>
+        <label>Tipo de Placa</label>
+        <select id="produto">
+          <option value="">Selecione</option>
+          <option value="painel_p10_50g">Placa Interna (50G)</option>
+          <option value="painel_p10_65g">Placa Externa (65G)</option>
+        </select>
+      </div>
+      <div>
+        <label>Quantidade</label>
+        <input id="quantidade" type="number" min="1" value="1">
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:6px">
+      <div>
+        <label>Área total (m²)</label>
+        <input id="area" type="number">
+      </div>
+      <div>
+        <label>Espessura</label>
+        <select disabled>
+          <option>10 cm (P10)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="muted" style="margin-top:6px">
+      Cada placa cobre <b>2,00 m²</b>
+    </div>
+
+    <label style="margin-top:10px">Desconto máximo permitido (%)</label>
+    <input id="descontoMax" type="number" readonly>
+
+    <div class="row" style="margin-top:10px">
+      <button class="btn" onclick="simular()">Simular capacidade</button>
+    </div>
+
+    <hr>
+
+    <label style="margin-top:6px">Desconto aplicado (%)</label>
+    <input id="descontoAplicado" type="number" value="0" oninput="recalcularDesconto()">
+
+    <label style="margin-top:6px">Preço final negociado (R$)</label>
+    <input id="precoFinal" type="text" oninput="recalcularPrecoFinal()">
+
+    <label style="margin-top:6px">Data de Entrega</label>
+    <input id="dataEntrega" type="date">
+
+    <div class="row" style="margin-top:10px">
+    <button class="btn btn-danger hidden" id="btnConfirmar" onclick="confirmarVenda()">
+        ✅ Confirmar Venda
+      
+    </button>
+    </div>
+
+    </div>
+
+    <!-- PAINEL DIREITO -->
+    <div class="card">
+    <strong>Resumo Operacional</strong>
+    <div id="resumo" class="summary" style="margin-top:6px">—</div>
+    </div>
+
+    </div>
+
+<script>
+/* ================= DADOS BASE ================= */
+const AREA_POR_PLACA = 2.0;
+
+const receitas = {
+  painel_p10_50g:{
+    nome:'Placa Interna 50G',
+    fator:0.07,
+    itens:{ eps:15, tela:1.1, cimento:48, areia:18, aditivo:0.02, conectores:0.8 }
+  },
+  painel_p10_65g:{
+    nome:'Placa Externa 65G',
+    fator:0.08,
+    itens:{ eps:15, tela:1.1, cimento:50, areia:19, aditivo:0.022, conectores:1 }
+  }
+};
+
+/* ================= PRECIFICAÇÃO ================= */
+
+// Preço unitário dos insumos (R$)
+const precoInsumos = {
+  eps: 12.50,
+  tela: 8.40,
+  cimento: 0.75,
+  areia: 0.12,
+  aditivo: 22.00,
+  conectores: 1.90
+};
+
+// Custos operacionais
+const custoOperacionalPorPlaca = 18.00;
+
+// Custos fixos
+const custosFixosMensais = 8500;
+const producaoMensalEstimada = 500;
+
+const custoFixoPorPlaca = custosFixosMensais / producaoMensalEstimada;
+
+// Margem padrão
+const margemPadrao = 0.35;
+
+/* ================= ESTOQUE SIMULADO (50 PLACAS EXTERNAS) ================= */
+const estoque = {
+  eps: 810,
+  tela: 60,
+  cimento: 2700,
+  areia: 1020,
+  aditivo: 1.2,
+  conectores: 54
+};
+
+/* ================= HISTÓRICO INTERNO ================= */
+const historicoVendas = [];
+
+let contextoAtual = null;
+
+/* ================= FORMATAÇÃO MONETÁRIA ================= */
+function formatBR(valor){
+  return valor.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+// Converte texto BR para número JS
+function parseBR(valor){
+  if(!valor) return 0;
+  // Remove pontos de milhar e troca a vírgula decimal por ponto
+  return Number(valor.replace(/\./g,'').replace(',','.'));
+}
+
+function aplicarMascaraMonetaria(el){
+  el.addEventListener('input', () => {
+    let v = el.value.replace(/\D/g,'');
+    v = (Number(v) / 100).toFixed(2);
+    // Usa formatBR para exibir o valor com vírgula e ponto
+    el.value = formatBR(Number(v));
+  });
+}
+
+/* ================= FUNÇÕES DE CÁLCULO ================= */
+
+function consumoTotal(produto, qtd){
+  const r = receitas[produto];
+  const total = {};
+  for(const k in r.itens){
+    // Calcula o consumo total incluindo o fator de perda
+    total[k] = r.itens[k] * qtd * (1 + r.fator);
+  }
+  return total;
+}
+
+function detalharCustoInsumos(produto, qtd){
+  const r = receitas[produto];
+  const detalhes = {};
+  let totalCustoDireto = 0;
+
+  // 1. Detalhamento dos Insumos
+  for(const k in r.itens){
+    const custoUnitario = precoInsumos[k] || 0;
+    const consumoPorPlaca = r.itens[k] * (1 + r.fator);
+    const custoPorPlaca = consumoPorPlaca * custoUnitario;
+    totalCustoDireto += custoPorPlaca;
+    
+    // Armazena o custo por placa para o relatório
+    detalhes[k] = custoPorPlaca;
+  }
+
+  return { detalhes, totalCustoDireto };
+}
+
+function custoTotalPorPlaca(produto){
+  // Usa o total calculado no detalhamento
+  const { totalCustoDireto } = detalharCustoInsumos(produto, 1);
+  return (
+    totalCustoDireto + 
+    custoOperacionalPorPlaca +
+    custoFixoPorPlaca
+  );
+}
+
+function precificacao(produto, margem = margemPadrao){
+  const { totalCustoDireto, detalhes } = detalharCustoInsumos(produto, 1); // Calcula o detalhe para 1 placa
+  const custoPlaca = totalCustoDireto + custoOperacionalPorPlaca + custoFixoPorPlaca;
+  const precoPlaca = custoPlaca * (1 + margem);
+
+  return {
+    custoDiretoPlaca: totalCustoDireto, // Custo Direto total de 1 placa
+    custoPlaca,
+    precoPlaca,
+    lucroPlaca: precoPlaca - custoPlaca,
+    detalhesInsumos: detalhes // Detalhe de cada insumo
+  };
+}
+
+
+function capacidade(produto){
+  const r = receitas[produto];
+  let max = Infinity, gargalo = '';
+  for(const k in r.itens){
+    const porPlaca = r.itens[k] * (1 + r.fator);
+    const placas = Math.floor((estoque[k]||0) / porPlaca);
+    if(placas < max){ max = placas; gargalo = k; }
+  }
+  return { max, gargalo };
+}
+
+function comprasNecessarias(produto, qtd){
+  const consumo = consumoTotal(produto, qtd);
+  const lista = {};
+  for(const k in consumo){
+    const falta = consumo[k] - (estoque[k]||0);
+    if(falta > 0) lista[k] = falta;
+  }
+  return lista;
+}
+
+function calcularPrecoMinimo(precoSugerido, descontoMax){
+  return precoSugerido * (1 - descontoMax / 100);
+}
+
+function recalcularDesconto(){
+  if(!contextoAtual) return;
+
+  const descontoMax = Number(descontoMaxEl.value);
+  const desconto = Number(descontoAplicadoEl.value);
+  const precoSugerido = contextoAtual.precificacao.precoSugeridoTotal;
+
+  if(desconto > descontoMax){
+    alert("⚠️ Desconto acima do permitido!");
+    descontoAplicadoEl.value = descontoMax;
+    return recalcularDesconto();
+  }
+
+  const precoFinal = precoSugerido * (1 - desconto / 100);
+  precoFinalEl.value = formatBR(precoFinal);
+
+  atualizarResumoDesconto(precoFinal, desconto);
+}
+
+function recalcularPrecoFinal(){
+  if(!contextoAtual) return;
+
+  const precoSugerido = contextoAtual.precificacao.precoSugeridoTotal;
+  // Usa parseBR para ler o valor formatado do input
+  const precoFinal = parseBR(precoFinalEl.value); 
+
+  const descontoMax = Number(descontoMaxEl.value || 0);
+  const precoMinimo = calcularPrecoMinimo(precoSugerido, descontoMax);
+
+  // Calcula o desconto real
+  const desconto = ((precoSugerido - precoFinal) / precoSugerido) * 100;
+
+  if(precoFinal < precoMinimo){
+    alert("⚠️ Preço abaixo do mínimo permitido!");
+    // Formata o preço mínimo para BR antes de injetar
+    precoFinalEl.value = formatBR(precoMinimo);
+    return recalcularPrecoFinal();
+  }
+
+  descontoAplicadoEl.value = desconto.toFixed(2);
+  atualizarResumoDesconto(precoFinal, desconto);
+}
+
+function atualizarResumoDesconto(precoFinal, desconto){
+  const custo = contextoAtual.precificacao.custoTotal;
+  const lucroFinal = precoFinal - custo;
+
+  contextoAtual.negociacao = {
+    descontoAplicado: desconto,
+    precoFinal,
+    lucroFinal
+  };
+}
+
+/* ================= PRINCIPAIS ================= */
+
+function simular(){
+  const cliente = clienteEl.value || '—';
+  const produto = produtoEl.value;
+  const qtd = Number(qtdEl.value);
+  const area = Number(areaEl.value);
+  
+  if(!produto || !qtd || qtd <= 0) return;
+
+  const cap = capacidade(produto);
+  const compras = comprasNecessarias(produto, qtd);
+
+  const prec = precificacao(produto);
+  const custoTotal = prec.custoPlaca * qtd;
+  const precoSugeridoTotal = prec.precoPlaca * qtd;
+  const lucroTotal = precoSugeridoTotal - custoTotal;
+  const descontoMax = 10;
+  descontoMaxEl.value = descontoMax;
+  const precoMinimo = calcularPrecoMinimo(precoSugeridoTotal, descontoMax);
+
+  let html = `
+  <div><b>Cliente:</b> ${cliente}</div>
+  <div><b>Produto:</b> ${receitas[produto].nome}</div>
+  <div><b>Área:</b> ${area || '—'} m²</div>
+  <div><b>Placas:</b> ${qtd}</div>
+  <hr>
+  <div><b>Capacidade produtiva:</b> ${cap.max} placas</div>
+  <div><b>Status:</b> ${cap.max >= qtd ? '🟢 OK' : '🔴 Estoque insuficiente'}</div>
+  <div class="muted">Insumo limitante: ${cap.gargalo}</div>
+  `;
+
+html += `
+<hr>
+<b>💰 Precificação</b>
+<div>Custo por placa: R$ ${formatBR(prec.custoPlaca)}</div>
+<div>Preço sugerido por placa: R$ ${formatBR(prec.precoPlaca)}</div>
+<div>Lucro por placa: R$ ${formatBR(prec.lucroPlaca)}</div>
+
+<hr>
+
+<div><b>Custo total:</b> R$ ${formatBR(custoTotal)}</div>
+<div><b>Preço sugerido total:</b> R$ ${formatBR(precoSugeridoTotal)}</div>
+<div><b>Lucro estimado:</b> R$ ${formatBR(lucroTotal)}</div>
+
+<hr>
+<b>📉 Política de Desconto</b>
+<div>Preço sugerido: R$ ${formatBR(precoSugeridoTotal)}</div>
+<div>Desconto máximo: ${descontoMax}%</div>
+<div>Preço mínimo permitido: R$ ${formatBR(precoMinimo)}</div>
+`;
+
+  if(Object.keys(compras).length){
+    html += `<hr><b>📦 Necessidade de Compra</b><ul>`;
+    for(const k in compras){
+      html += `<li>${k}: ${compras[k].toFixed(2)}</li>`;
+    }
+    html += `</ul>`;
+  }
+
+  resumo.innerHTML = html;
+  contextoAtual = {
+    cliente,
+    produto,
+    qtd,
+    area,
+    compras,
+    precificacao: {
+          custoDiretoPlaca: prec.custoDiretoPlaca,
+          custoPlaca: prec.custoPlaca,
+          precoPlaca: prec.precoPlaca,
+          lucroPlaca: prec.lucroPlaca,
+          custoTotal,
+          precoSugeridoTotal,
+          lucroTotal,
+          detalhesInsumos: prec.detalhesInsumos 
+        },
+    negociacao: {
+      descontoAplicado: 0,
+      precoFinal: precoSugeridoTotal,
+      lucroFinal: lucroTotal
+    }
+  };
+
+  btnConfirmar.classList.remove('hidden');
+  // Garante que os campos de negociação são preenchidos na primeira simulação
+  descontoAplicadoEl.value = 0;
+  precoFinalEl.value = formatBR(precoSugeridoTotal);
+}
+
+function confirmarVenda(){
+  // Usa parseBR para ler o valor formatado do input
+  const preco = parseBR(precoFinalEl.value); 
+  const desconto = contextoAtual.negociacao?.descontoAplicado || 0;
+  const dataEntrega = dataEntregaEl.value;
+  const custoReal = contextoAtual.precificacao.custoTotal;
+  const lucroReal = preco - custoReal;
+
+  if(preco <= 0 || !dataEntrega) return alert("Informe preço e data");
+
+  if(lucroReal < 0){  
+  if(!confirm("⚠️ Venda com prejuízo. Deseja continuar?")) return;
+  }
+  const venda = {
+    ...contextoAtual,
+    preco,
+    dataEntrega,
+    negociacao: contextoAtual.negociacao || null,
+    data: new Date().toISOString()
+  };
+
+  historicoVendas.push(venda);
+  gerarPDF(venda);
+  alert("Venda confirmada e PDF gerado.");
+}
+
+
+function gerarPDF(v){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  const ACCENT_COLOR = '#00e5ff'; // Cor de destaque (Azul Ciano)
+  const TEXT_COLOR = '#000000'; // Cor principal do texto (Preto)
+  const DETAIL_COLOR = '#444444'; // Cor para detalhes menores (Cinza Escuro)
+  //const custoAdicionalTotal = (custoOperacionalPorPlaca + custoFixoPorPlaca) * v.qtd;
+  let y = 15; // Posição inicial Y
+
+  // ====================================
+  // 1. CABEÇALHO
+  // ====================================
+  doc.setFontSize(18);
+  doc.setTextColor(ACCENT_COLOR);
+  doc.setFont('helvetica', 'bold');
+  doc.text("ORÇAMENTO — FAST EPS", 14, y);
+  y += 8;
+
+  // Data da Venda
+  doc.setFontSize(9);
+  doc.setTextColor(DETAIL_COLOR);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, y);
+  y += 5;
+  doc.setDrawColor(ACCENT_COLOR);
+  doc.line(14, y, 196, y); // Linha separadora
+  y += 7;
+
+  // ====================================
+  // 2. DETALHES DO PROJETO
+  // ====================================
+  doc.setFontSize(11);
+  doc.setTextColor(TEXT_COLOR);
+  doc.setFont('helvetica', 'bold');
+  doc.text("DADOS DO PROJETO", 14, y);
+  y += 7;
+
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Cliente: ${v.cliente}`, 18, y);
+  y += 6;
+  doc.text(`Produto: ${receitas[v.produto].nome}`, 18, y);
+    doc.text(`Quantidade: ${v.qtd} placas`, 90, y);
+  y += 6;
+  doc.text(`Área Total: ${v.area || '—'} m²`, 18, y);
+  doc.text(`Data de Entrega: ${v.dataEntrega}`, 90, y);
+  y += 10;
+  
+  // ====================================
+  // 3. DETALHAMENTO DE CUSTOS (POR PLACA)
+  // ====================================
+  doc.setFont('helvetica', 'bold');
+  doc.text("DETALHAMENTO DO CUSTO POR PLACA", 14, y);
+  y += 7;
+  
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  
+  // 3.1 CUSTOS DIRETOS (INSUMOS)
+  doc.setTextColor(DETAIL_COLOR);
+  doc.text(`CUSTOS DIRETOS (INSUMOS):`, 18, y);
+  doc.text(`R$ ${formatBR(v.precificacao.custoDiretoPlaca)}`, 180, y, { align: 'right' }); 
+  y += 5;
+  
+  // Detalhe dos Insumos (Linha por linha)
+  for(const insumo in v.precificacao.detalhesInsumos){
+      const valor = v.precificacao.detalhesInsumos[insumo];
+      doc.text(`- ${insumo.charAt(0).toUpperCase() + insumo.slice(1)}`, 22, y);
+      doc.text(`R$ ${formatBR(valor)}`, 180, y, { align: 'right' });
+      y += 5;
+  }
+  y += 2;
+
+  // 3.2 OUTROS CUSTOS
+  doc.text(`CUSTOS OPERACIONAIS (Ex: Mão de Obra Variável):`, 18, y);
+  doc.text(`R$ ${formatBR(custoOperacionalPorPlaca)}`, 180, y, { align: 'right' });
+  y += 5;
+  doc.text(`CUSTOS FIXOS RATEADOS (Ex: Aluguel, Salários Fixos):`, 18, y);
+  doc.text(`R$ ${formatBR(custoFixoPorPlaca)}`, 180, y, { align: 'right' });
+  y += 5;
+
+  // Custo Total da Placa (Destaque)
+  y += 3;
+  doc.setFontSize(12);
+  doc.setTextColor(ACCENT_COLOR);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`CUSTO TOTAL DA PLACA:`, 18, y);
+  doc.text(`R$ ${formatBR(v.precificacao.custoPlaca)}`, 180, y, { align: 'right' });
+  y += 12;
+  
+  // ====================================
+  // 4. PRECIFICAÇÃO E NEGOCIAÇÃO
+  // ====================================
+  doc.setTextColor(TEXT_COLOR);
+  doc.setFontSize(11);
+  doc.text("POLÍTICA DE PREÇO E NEGOCIAÇÃO", 14, y);
+  y += 7;
+
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+
+  doc.text(`Preço Sugerido Total:`, 18, y);
+  doc.text(`R$ ${formatBR(v.precificacao.precoSugeridoTotal)}`, 180, y, { align: 'right' });
+  y += 5;
+  
+  doc.text(`Desconto Aplicado/Acréscimo :`, 18, y);
+  doc.text(`${formatBR(v.negociacao.descontoAplicado)}%`, 180, y, { align: 'right' }); 
+  y += 5;
+
+  // Preço Final (Destaque)
+  y += 3;
+  doc.setFontSize(12);
+  doc.setTextColor(ACCENT_COLOR);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`PREÇO FINAL NEGOCIADO:`, 18, y);
+  doc.text(`R$ ${formatBR(v.negociacao.precoFinal)}`, 180, y, { align: 'right' });
+  y += 10; 
+  // Removido o bloco duplicado de Preço Final que estava aqui.
+
+  // ====================================
+  // 5. NECESSIDADE DE COMPRAS
+  // ====================================
+  let custoTotalReposicao = 0;
+  if(Object.keys(v.compras).length){
+      doc.setDrawColor(200);
+      doc.line(14, y, 196, y); // Linha separadora
+      y += 7;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(TEXT_COLOR);
+      doc.setFontSize(11);
+      doc.text("NECESSIDADE DE COMPRAS (FALTA COMPRAR PARA EXECUTAR A ORDEM DE VENDA)", 14, y);
+      y += 7;
+
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+
+      // Cabeçalhos da Tabela
+      doc.text("INSUMO", 18, y);
+      doc.text("FALTA", 80, y);
+      doc.text("PREÇO UN.", 120, y);
+      doc.text("CUSTO REPOSIÇÃO (R$)", 180, y, { align: 'right' });
+      y += 3;
+      
+      doc.setDrawColor(DETAIL_COLOR);
+      doc.line(14, y, 196, y); // Linha de cabeçalho
+      y += 5;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      
+      for(const k in v.compras){
+          const falta = v.compras[k];
+          const precoUnitario = precoInsumos[k] || 0;
+          const custoItem = falta * precoUnitario;
+          custoTotalReposicao += custoItem;
+          
+          // Colunas
+          doc.text(k.charAt(0).toUpperCase() + k.slice(1), 18, y);
+          doc.text(falta.toFixed(2), 80, y);
+          doc.text(`R$ ${formatBR(precoUnitario)}`, 120, y);
+          doc.text(formatBR(custoItem), 180, y, { align: 'right' });
+          y += 5;
+      }
+
+      // Total da Reposição (Destaque)
+      y += 3;
+      doc.setDrawColor(DETAIL_COLOR);
+      doc.line(14, y, 196, y); // Linha de total
+      y += 4;
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(ACCENT_COLOR);
+      doc.text("INVESTIMENTO TOTAL DE REPOSIÇÃO:", 18, y);
+      doc.text(`R$ ${formatBR(custoTotalReposicao)}`, 180, y, { align: 'right' });
+      y += 10;
+  }
+
+  // ====================================
+  // 6. RESUMO FINANCEIRO EXECUTIVO
+  // ====================================
+  
+// ... (Continuação da função gerarPDF(v) após a seção 5. NECESSIDADE DE COMPRAS)
+
+  // ====================================
+  // 6. RESUMO FINANCEIRO EXECUTIVO (REVISADO PARA O ENGENHEIRO)
+  // ====================================
+  
+  // CÁLCULOS NECESSÁRIOS:
+  const custoDiretoTotalVenda = v.precificacao.custoDiretoPlaca * v.qtd;
+  const custoAdicionalTotal = (custoOperacionalPorPlaca + custoFixoPorPlaca) * v.qtd;
+  const lucroReal = v.preco - v.precificacao.custoTotal;
+  
+  // Usamos o cálculo de capacidade para a mensagem de clareza
+  const cap = capacidade(v.produto); 
+  const placasNoEstoque = cap.max >= v.qtd ? v.qtd : cap.max; 
+  const placasFaltantes = v.qtd - placasNoEstoque; // Se for negativo (tem estoque), será 0
+
+  doc.setDrawColor(200);
+  doc.line(14, y, 196, y); // Linha separadora
+  y += 7;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(TEXT_COLOR);
+  doc.setFontSize(11);
+  doc.text("RESUMO FINANCEIRO EXECUTIVO", 14, y);
+  y += 7;
+
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  
+  // ====================================
+  // 6.1 DADOS DA VENDA
+  // ====================================
+
+  // VENDA EXECUTADA (Destaque do valor)
+  doc.setFont('helvetica', 'bold');
+  doc.text(`VENDA EXECUTADA (${v.qtd} PLACAS):`, 18, y);
+  doc.text(`R$ ${formatBR(v.negociacao.precoFinal)}`, 180, y, { align: 'right' }); 
+  y += 5;
+  doc.setFont('helvetica', 'normal'); // Volta ao normal
+  
+  // CUSTO TOTAL DO ORÇAMENTO (Custo Padrão)
+  doc.text(`CUSTO TOTAL DE REFERÊNCIA (Padrão Contábil):`, 18, y);
+  doc.text(`R$ ${formatBR(v.precificacao.custoTotal)}`, 180, y, { align: 'right' });
+  y += 5;
+  
+  // GANHO REAL DE VENDA (Lucro) - Destaque
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(ACCENT_COLOR);
+  doc.text(`GANHO REAL DE VENDA (Lucro):`, 18, y);
+  doc.text(`R$ ${formatBR(lucroReal)}`, 180, y, { align: 'right' });
+  y += 7;
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(TEXT_COLOR);
+  
+  // Linha Separadora de Detalhes
+  doc.setDrawColor(DETAIL_COLOR);
+  doc.line(14, y, 196, y);
+  y += 5;
+
+  // ====================================
+  // 6.2 CUSTOS DE CAMPO E FLUXO DE CAIXA
+  // ====================================
+
+  // CUSTO DIRETO DA VENDA (Insumos totais, para contraste com o total)
+  doc.text(`CUSTO DE INSUMOS DA VENDA (${v.qtd} PLACAS):`, 18, y);
+  doc.text(`R$ ${formatBR(custoDiretoTotalVenda)}`, 180, y, { align: 'right' });
+  y += 5;
+
+  // CUSTO FIXO E OPERACIONAL
+  doc.text(`OPERAÇÃO E CUSTOS FIXOS:`, 18, y);
+  doc.text(`R$ ${formatBR(custoAdicionalTotal)}`, 180, y, { align: 'right' });
+  y += 5;
+
+ 
+  // TOTAL PERSONALIZADO (Custo Direto + Custo Operacional/Fixo)
+  doc.setFont('helvetica', 'bold');
+  const custoDaVenda = custoDiretoTotalVenda + custoAdicionalTotal;
+  doc.text(`TOTAL PERSONALIZADO DE CUSTO:`, 18, y);
+  doc.text(`R$ ${formatBR(custoDaVenda)}`, 180, y, { align: 'right' });
+  y += 10;
+  
+  // FIM DO NOVO BLOCO
+
+  doc.save(`venda_${v.cliente}_${Date.now()}.pdf`);
+}
+
+
+/* ================= ELEMENTOS ================= */
+// 1. DECLARE TODOS OS ELEMENTOS PRIMEIRO
+const clienteEl = document.getElementById('cliente');
+const produtoEl = document.getElementById('produto');
+const qtdEl = document.getElementById('quantidade');
+const areaEl = document.getElementById('area');
+const resumo = document.getElementById('resumo');
+const btnConfirmar = document.getElementById('btnConfirmar');
+const dataEntregaEl = document.getElementById('dataEntrega');
+const descontoMaxEl = document.getElementById('descontoMax');
+const descontoAplicadoEl = document.getElementById('descontoAplicado');
+const precoFinalEl = document.getElementById('precoFinal');
+// A variável precoVenda não existe no seu HTML e está ok deixar comentada/removida:
+// const precoVenda = document.getElementById('precoVenda');
+
+// 2. ADICIONE OS LISTENERS E CHAME AS FUNÇÕES DEPOIS DA DECLARAÇÃO
+
+precoFinalEl.addEventListener('blur', () => {
+    // Usa parseBR para garantir que limpa a formatação ao focar/desfocar
+    const valorNumerico = parseBR(precoFinalEl.value);
+    precoFinalEl.value = formatBR(valorNumerico);
+});
+
+/* ================= MÁSCARAS ================= */
+aplicarMascaraMonetaria(precoFinalEl);
+
+</script>
+
+    </body>
+    </html>
