@@ -98,39 +98,53 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    /* =========================
-        SERVIR ARQUIVOS ESTÁTICOS
+/* =========================
+        SERVIR ARQUIVOS ESTÁTICOS (CORRIGIDO)
     ========================= */
     const PUBLIC_DIR = path.join(ROOT, 'public');
     const DADOS_DIR  = path.join(ROOT, 'dados');
 
-    // Mapeamento de tipos de arquivo
     const tipos = {
         '.html': 'text/html; charset=utf-8',
         '.js':   'application/javascript; charset=utf-8',
         '.css':  'text/css; charset=utf-8',
         '.csv':  'text/csv; charset=utf-8',
-        '.json': 'application/json; charset=utf-8'
+        '.json': 'application/json; charset=utf-8',
+        '.png':  'image/png',
+        '.jpg':  'image/jpeg'
     };
 
     let filePath;
+
+    // 1. Regra para HTML e Raiz
     if (urlPath === '/' || urlPath.endsWith('.html')) {
         filePath = urlPath === '/' ? path.join(PUBLIC_DIR, 'index.html') : path.join(PUBLIC_DIR, path.basename(urlPath));
-    } else if (urlPath.startsWith('/dados/')) {
+    } 
+    // 2. Regra para pasta de Dados (CSV/JSON)
+    else if (urlPath.startsWith('/dados/')) {
         filePath = path.join(DADOS_DIR, path.basename(urlPath));
-    } else if (urlPath.startsWith('/imagens/')) {
+    } 
+    // 3. Regra para Imagens
+    else if (urlPath.startsWith('/imagens/')) {
         filePath = path.join(PUBLIC_DIR, 'imagens', path.basename(urlPath));
+    } 
+    // 4. Regra Geral (CSS, JS, Favicon, etc) - BUSCA NA PUBLIC
+    else {
+        filePath = path.join(PUBLIC_DIR, path.basename(urlPath));
     }
 
+    // Tenta servir o arquivo se ele existir
     if (filePath && fs.existsSync(filePath)) {
         const ext = path.extname(filePath).toLowerCase();
         res.writeHead(200, { 'Content-Type': tipos[ext] || 'application/octet-stream' });
         return res.end(fs.readFileSync(filePath));
     }
 
+    // Se falhar tudo
+    console.log(`Log: 404 em ${urlPath} (Tentou: ${filePath})`);
     res.writeHead(404);
-    res.end('Rota não encontrada');
-});
+    res.end('Arquivo não encontrado');
+  });
 
 server.listen(PORT, () => {
     console.log(`🔥 Servidor FAST EPS rodando em http://localhost:${PORT}`);
