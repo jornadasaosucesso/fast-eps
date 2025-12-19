@@ -109,6 +109,33 @@
 </head>
 
 <body>
+<div id="lockscreen" style="display: none; position: fixed; inset: 0; background: #0b0b0b; z-index: 999999; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+    <h1 style="color: #00e5ff; font-size: 32px; letter-spacing: 2px;">💎 FAST EPS</h1>
+    <div style="background: #1a1a1a; padding: 30px; border-radius: 20px; border: 1px solid #333; margin: 20px;">
+        <p style="font-size: 18px; color: #fff; margin: 0 0 20px 0;">
+            Acompanhamento de pedidos em desenvolvimento.<br>
+            <span style="color: #00ff88; font-weight: bold;">Status: Em fase de conclusão.</span>
+        </p>
+        <button onclick="window.location.href='index.html'" 
+                style="background: #00e5ff; color: #000; border: none; padding: 15px 30px; border-radius: 12px; font-weight: bold; cursor: pointer;">
+            ⬅️ Voltar ao Menu Principal
+        </button>
+    </div>
+</div>
+
+<script>
+    // Se NÃO for localhost, bloqueia na hora!
+    if (window.location.hostname !== 'localhost' && 
+        window.location.hostname !== '127.0.0.1' && 
+        window.location.hostname !== '') {
+        
+        const lock = document.getElementById('lockscreen');
+        lock.style.display = 'flex';
+        
+        // Bloqueia o scroll da página de trás
+        document.body.style.overflow = 'hidden';
+    }
+</script>
 
 <h1>Acompanhar Pedidos</h1>
 
