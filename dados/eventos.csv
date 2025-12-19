@@ -1,0 +1,6 @@
+evento_id,pedido_id,data_evento,etapa,tipo_evento,descricao,usuario,custo,receita,status_resultante,meta
+1766104677200,PED-1766104677195,2025-12-19T00:37:57.200Z,VENDA,VENDA_REALIZADA,Venda de 18 placas undefined para JORGE PARA TESTE DA META,vendedor_1,5191.92,7009.10,EM_PRODUCAO,{"data_entrega":"2026-01-22";"financeiro":{"regra":"3x_FIXA_NORMA_CASA";"valor_total":"7009.10";"parcelas":[{"n":1;"valor":"2336.37";"vencimento":"30_DIAS"};{"n":2;"valor":"2336.37";"vencimento":"60_DIAS"};{"n":3;"valor":"2336.36";"vencimento":"90_DIAS"}]}}
+1766105180785,PED-1766104677195,2025-12-19T00:46:20.785Z,PRODUÇÃO,PRODUÇÃO_INICIADA,Placas em fabricação,operador_fast,0.00,0.00,EM_PRODUCAO,{}
+1766105190633,PED-1766104677195,2025-12-19T00:46:30.633Z,PRODUÇÃO,PRODUTO_PRONTO,Placas finalizadas,operador_fast,0.00,0.00,EM_PRODUCAO,{}
+1766105195637,PED-1766104677195,2025-12-19T00:46:35.637Z,LOGÍSTICA,SAIU_PARA_ENTREGA,Carga em trânsito,operador_fast,0.00,0.00,EM_PRODUCAO,{}
+1766105201733,PED-1766104677195,2025-12-19T00:46:41.733Z,CONCLUÍDO,ENTREGUE_CONCLUIDO,Pedido finalizado,operador_fast,0.00,0.00,EM_PRODUCAO,{}

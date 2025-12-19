@@ -42,25 +42,6 @@ h1{
 }
 label{font-size:12px;color:var(--muted)}
 
-/* REMOVIDO ESTILO CONFLITANTE ANTIGO */
-/* input, select {
-  background: #ffffff;
-  color: #000000;
-  border: 2px solid #d0d7de;
-  font-weight: 600;
-}
-
-input::placeholder {
-  color: #8a8a8a;
-  font-weight: 400;
-}
-
-input:focus, select:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(0,229,255,0.2);
-} */
-
 .row{display:flex;gap:8px}
 .row>*{flex:1}
 .card label {
@@ -68,21 +49,16 @@ input:focus, select:focus {
   display: block;
 }
 
-/* REMOVIDO ESTILO CONFLITANTE ANTIGO */
-/* input, select {
-  margin-top: 4px;
-} */
-
 hr {
   margin: 18px 0;
 }
 
 button.btn {
-  /* margin-top: 12px; Adicionado no HTML com a div .campo */
-  height: 52px; /* Padronizado para a altura dos campos */
+
+  height: 52px; 
   font-size: 16px;
-  padding: 0 14px; /* Ajuste de padding */
-  border-radius: 14px; /* Padronizado para a borda dos campos */
+  padding: 0 14px; 
+  border-radius: 14px; 
 }
 
 .btn{
@@ -134,78 +110,12 @@ RESUMO OPERACIONAL
   margin-top:10px;
 }
 }
-/* REMOVIDO ESTILO ANTIGO */
-/* .desconto-fixo{
-  display:inline-flex;         
-  align-items:center;
-  justify-content:center;
-
-  margin-top:6px;
-  padding:6px 14px;             
-  min-width:64px;               
-
-  background:#ffffff;
-  color:#000000;
-
-  border-radius:10px;
-  border:2px solid #d0d7de;
-
-  font-weight:700;
-  font-size:14px;
-} */
-
-/* REMOVIDO ESTILO CONFLITANTE ANTIGO */
-/* #cliente{
-  font-size:18px;
-  padding:12px 14px;
-  font-weight:700;
-
-  border:2px solid var(--accent);
-  border-radius:12px;
-
-  background:#ffffff;
-  color:#000;
-
-  box-shadow:0 0 12px rgba(0,229,255,.35);
-} */
-
-/* REMOVIDO ESTILO CONFLITANTE ANTIGO DE PAGAMENTO */
-/* .pagamento{
-  width:100%;
-  padding:8px 10px;
-  font-size:14px;
-  font-weight:600;
-
-  background:#f2f2f2;
-  color:#666;
-
-  border:2px dashed #bfcbd0;
-  border-radius:10px;
-
-  cursor:not-allowed;
-} */
 
 @media(max-width:600px){
-  /* #cliente{ REMOVIDO */
-    /* font-size:16px; REMOVIDO */
-  /* } REMOVIDO */
-
   .row{
     flex-direction:column;
   }
 }
-/* REMOVIDO ESTILO CONFLITANTE ANTIGO DE CAMPO CLIENTE */
-/* .campo-cliente input{
-  width:100%;
-  height:56px;
-  font-size:20px;
-  font-weight:600;
-  padding:12px 16px;
-  border-radius:14px;
-  border:2px solid #00eaff;
-  background:#fff;
-  box-shadow:0 0 18px rgba(0,234,255,.35);
-} */
 
 .col-maior{
   flex:2;
@@ -214,29 +124,18 @@ RESUMO OPERACIONAL
 .col-menor{
   flex:1;
 }
-/* REMOVIDO ESTILO CONFLITANTE ANTIGO DE SELECT */
-/* select{
-  width:100%;
-  height:44px;
-  font-size:16px;
-  border-radius:10px;
-} */
-
-/* =========================
-  PADRÃO ÚNICO DE CAMPOS
-========================= */
 
 .campo{
   display:flex;
   flex-direction:column;
-  gap:4px; /* Altura de 4px entre label e input */
+  gap:4px; 
 }
 
 /* ESTILO PADRÃO PARA TODOS OS INPUTS/SELECTS */
 .campo input,
 .campo select,
 .campo .campo-fixo{
-  height:52px; /* Altura padronizada */
+  height:52px; 
   padding:12px 14px;
   font-size:16px;
   font-weight:600;
@@ -250,7 +149,6 @@ RESUMO OPERACIONAL
   transition:.2s;
 }
 
-/* foco */
 .campo input:focus,
 .campo select:focus{
   border-color:#00e5ff;
@@ -258,9 +156,7 @@ RESUMO OPERACIONAL
   outline:none;
 }
 
-/* CAMPO CLIENTE - MANTENDO O DESTAQUE/COR, MAS PADRONIZANDO A ALTURA COM O ESTILO ACIMA */
 .campo-cliente input{
-  /* height:60px; REMOVIDO PARA USAR 52PX PADRÃO */
   font-size:20px;
   font-weight:700;
 
@@ -292,12 +188,10 @@ RESUMO OPERACIONAL
 
  
 <div class="row" style="margin-top:6px"> <div class="col-maior">
-    <div class="campo"> <label>Tipo de Placa</label>
-      <select id="tipoPlaca">
-        <option>Selecione</option>
-        <option value="painel_p10_50g">EPS Padrão</option>
-        <option value="painel_p10_65g">EPS Estrutural</option>
-      </select>
+  <div class="campo"> <label>Tipo de Placa</label>
+    <select id="tipoPlaca">
+      <option value="">Selecione</option>
+    </select>
     </div>
   </div>
 
@@ -349,7 +243,6 @@ RESUMO OPERACIONAL
     Simular capacidade
   </button>
 </div>
-
     <hr>
 
 <div class="campo"> <label>Desconto aplicado (%)</label>
@@ -380,55 +273,43 @@ RESUMO OPERACIONAL
     </div>
 
 <script>
+
 /* ================= DADOS BASE ================= */
-const AREA_POR_PLACA = 2.0;
+let AREA_POR_PLACA = 0;
 
-const receitas = {
-  painel_p10_50g:{
-    nome:'Placa Interna 50G',
-    fator:0.07,
-    itens:{ eps:15, tela:1.1, cimento:48, areia:18, aditivo:0.02, conectores:0.8 }
-  },
-  painel_p10_65g:{
-    nome:'Placa Externa 65G',
-    fator:0.08,
-    itens:{ eps:15, tela:1.1, cimento:50, areia:19, aditivo:0.022, conectores:1 }
-  }
-};
+const receitas = {};
+const precoInsumos = {};
+const estoque = {};
+const tipoPlaca = document.getElementById('tipoPlaca');
 
-/* ================= PRECIFICAÇÃO ================= */
+let custoOperacionalPorPlaca = 0;
+let custosFixosMensais = 0;
+let producaoMensalEstimada = 0;
+let margemPadrao = 0;
+let custoFixoPorPlaca = 0;
+let dadosCarregados = false;
 
-// Preço unitário dos insumos (R$)
-const precoInsumos = {
-  eps: 12.50,
-  tela: 8.40,
-  cimento: 0.75,
-  areia: 0.12,
-  aditivo: 22.00,
-  conectores: 1.90
-};
+Promise.all([
+  fetch('/dados/receitas.csv').then(r => r.text()),
+  fetch('/dados/insumos.csv').then(r => r.text()),
+  fetch('/dados/estoque.csv').then(r => r.text()),
+  fetch('/dados/parametros.csv').then(r => r.text()),
+  fetch('/dados/constantes.csv').then(r => r.text())
+])
+.then(([csvReceitas, csvInsumos, csvEstoque, csvParametros, csvConstantes]) => {
 
-// Custos operacionais
-const custoOperacionalPorPlaca = 18.00;
+  carregarReceitas(csvReceitas);
+  carregarInsumos(csvInsumos);
+  carregarEstoque(csvEstoque);
+  carregarParametros(csvParametros);
+  carregarConstantes(csvConstantes);
 
-// Custos fixos
-const custosFixosMensais = 8500;
-const producaoMensalEstimada = 500;
-
-const custoFixoPorPlaca = custosFixosMensais / producaoMensalEstimada;
-
-// Margem padrão
-const margemPadrao = 0.35;
-
-/* ================= ESTOQUE SIMULADO (50 PLACAS EXTERNAS) ================= */
-const estoque = {
-  eps: 810,
-  tela: 60,
-  cimento: 2700,
-  areia: 1020,
-  aditivo: 1.2,
-  conectores: 54
-};
+  dadosCarregados = true;
+})
+.catch(err => {
+  console.error(err);
+  alert('Erro ao carregar dados');
+});
 
 /* ================= HISTÓRICO INTERNO ================= */
 const historicoVendas = [];
@@ -457,6 +338,74 @@ function aplicarMascaraMonetaria(el){
 }
 
 /* ================= FUNÇÕES DE CÁLCULO ================= */
+function carregarReceitas(csv){
+  const linhas = csv.trim().split('\n');
+  linhas.shift();
+
+  linhas.forEach(l => {
+    const c = l.split(',');
+
+    receitas[c[0]] = {
+      nome: c[1],
+      fator: Number(c[2]),
+      itens:{
+        eps:Number(c[3]),
+        tela:Number(c[4]),
+        cimento:Number(c[5]),
+        areia:Number(c[6]),
+        aditivo:Number(c[7]),
+        conectores:Number(c[8])
+      }
+    };
+
+    tipoPlaca.innerHTML += `<option value="${c[0]}">${c[1]}</option>`;
+  });
+}
+function carregarInsumos(csv){
+  const linhas = csv.trim().split('\n');
+  linhas.shift();
+
+  linhas.forEach(l => {
+    const [insumo, valor] = l.split(',');
+    precoInsumos[insumo] = Number(valor);
+  });
+}
+
+function carregarEstoque(csv){
+  const linhas = csv.trim().split('\n');
+  linhas.shift();
+
+  linhas.forEach(l => {
+    const [insumo, qtd] = l.split(',');
+    estoque[insumo] = Number(qtd);
+  });
+}
+
+function carregarParametros(csv){
+  const linhas = csv.trim().split('\n');
+  linhas.shift();
+
+  linhas.forEach(l => {
+    const [chave, valor] = l.split(',');
+    if(chave === 'custoOperacionalPorPlaca') custoOperacionalPorPlaca = Number(valor);
+    if(chave === 'custosFixosMensais') custosFixosMensais = Number(valor);
+    if(chave === 'producaoMensalEstimada') producaoMensalEstimada = Number(valor);
+    if(chave === 'margemPadrao') margemPadrao = Number(valor);
+  });
+
+  custoFixoPorPlaca = custosFixosMensais / producaoMensalEstimada;
+}
+
+function carregarConstantes(csv){
+  const linhas = csv.trim().split('\n');
+  linhas.shift();
+
+  linhas.forEach(l => {
+    const [chave, valor] = l.split(',');
+    if(chave === 'AREA_POR_PLACA') AREA_POR_PLACA = Number(valor);
+  });
+}
+
 
 function consumoTotal(produto, qtd){
   const r = receitas[produto];
@@ -509,6 +458,11 @@ function precificacao(produto, margem = margemPadrao){
 
 function capacidade(produto){
   const r = receitas[produto];
+  if (!r) {
+    console.error('Produto não encontrado em receitas:', produto, receitas);
+    return { max: 0, gargalo: '—' };
+  }
+
   let max = Infinity, gargalo = '';
   for(const k in r.itens){
     const porPlaca = r.itens[k] * (1 + r.fator);
@@ -527,6 +481,7 @@ function comprasNecessarias(produto, qtd){
   }
   return lista;
 }
+
 
 function calcularPrecoMinimo(precoSugerido, descontoMax){
   return precoSugerido * (1 - descontoMax / 100);
@@ -584,17 +539,22 @@ function atualizarResumoDesconto(precoFinal, desconto){
 }
 
 /* ================= PRINCIPAIS ================= */
-// Adicionei produtoEl.value, pois estava faltando na simulação original
-// O valor do descontoMaxEl.value será definido na função simular
-// descontoMaxEl.value = 10; 
 
 function simular(){
+  if(!dadosCarregados){
+    alert('⏳ Aguarde, carregando dados...');
+    return;  
+  }
   const cliente = clienteEl.value || '—';
   const produto = produtoEl.value;
   const qtd = Number(qtdEl.value);
   const area = Number(areaEl.value);
+
+  if (!receitas[produto]) {
+    alert("Tipo de placa inválido ou não carregado.");
+    return;
+  }
   
-  // Alterado o campo de validação: produtoEl.value não estava sendo usado na lógica original do HTML, o select não tinha ID/Value
   if(!produto || produto === 'Selecione' || !qtd || qtd <= 0) {
     alert("Preencha Tipo de Placa e Quantidade.");
     return;
@@ -675,34 +635,102 @@ html += `
   };
 
   btnConfirmar.classList.remove('hidden');
-  // Garante que os campos de negociação são preenchidos na primeira simulação
   descontoAplicadoEl.value = 0;
   precoFinalEl.value = formatBR(precoSugeridoTotal);
 }
 
-function confirmarVenda(){
+async function confirmarVenda(){
+  if(btnConfirmar.disabled) return; 
+  btnConfirmar.disabled = true;
+
   const preco = parseBR(precoFinalEl.value); 
-  const desconto = contextoAtual.negociacao?.descontoAplicado || 0;
   const dataEntrega = dataEntregaEl.value;
   const custoReal = contextoAtual.precificacao.custoTotal;
   const lucroReal = preco - custoReal;
 
-  if(preco <= 0 || !dataEntrega) return alert("Informe preço e data");
-
-  if(lucroReal < 0){  
-  if(!confirm("⚠️ Venda com prejuízo. Deseja continuar?")) return;
+  if(preco <= 0 || !dataEntrega){
+    btnConfirmar.disabled = false;
+    return alert("Informe preço e data");
   }
+
+  if(lucroReal < 0){
+    if(!confirm("⚠️ Venda com prejuízo. Deseja continuar?")){
+      btnConfirmar.disabled = false;
+      return;
+    }
+  }
+
   const venda = {
     ...contextoAtual,
     preco,
     dataEntrega,
-    negociacao: contextoAtual.negociacao || null,
     data: new Date().toISOString()
   };
 
-  historicoVendas.push(venda);
-  gerarPDF(venda);
-  alert("Venda confirmada e PDF gerado.");
+  // Gerando o ID corretamente
+  const pedidoId = `PED-${Date.now()}`;
+
+  try {
+    // Agora enviamos apenas o registro do evento para o servidor
+await registrarEvento({
+  pedido_id: pedidoId,
+  etapa: 'VENDA',
+  tipo_evento: 'VENDA_REALIZADA',
+  // Adicionamos o modelo aqui no texto 
+  descricao: `Venda de ${venda.qtd} placas ${venda.modelo} para ${venda.cliente}`, 
+  usuario: 'vendedor_1',
+  custo: custoReal,
+  receita: preco,
+  meta: {
+    data_entrega: dataEntrega
+  }
+});
+    // Gera o PDF para o cliente
+    gerarPDF(venda);
+
+    historicoVendas.push(venda);
+
+    alert("✅ Venda confirmada e PDF gerado com sucesso!");
+    resetarFormulario();
+
+  } catch(err) {
+    console.error(err);
+    alert("❌ Erro ao registrar a venda no servidor.");
+  }
+
+  btnConfirmar.disabled = false;
+}
+
+async function registrarEvento(evento){
+  const res = await fetch('/api/evento', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(evento)
+  });
+
+  const json = await res.json();
+  if(!json.sucesso){
+    throw new Error('Falha ao registrar evento');
+  }
+}
+
+  // ===============================
+  // FINALIZA VENDA
+  // ===============================
+
+function resetarFormulario(){
+  clienteEl.value = '';
+  produtoEl.value = '';
+  qtdEl.value = 1;
+  areaEl.value = '';
+  descontoAplicadoEl.value = 0;
+  precoFinalEl.value = '';
+  dataEntregaEl.value = '';
+
+  resumo.innerHTML = '—';
+  btnConfirmar.classList.add('hidden');
+
+  contextoAtual = null;
 }
 
 
@@ -954,8 +982,8 @@ function gerarPDF(v){
 
 /* ================= ELEMENTOS ================= */
 const clienteEl = document.getElementById('cliente');
-const produtoEl = document.getElementById('tipoPlaca'); // Corrigido ID
-const qtdEl = document.getElementById('quantidade'); // Corrigido ID
+const produtoEl = document.getElementById('tipoPlaca');
+const qtdEl = document.getElementById('quantidade');
 const areaEl = document.getElementById('area');
 const resumo = document.getElementById('resumo');
 const btnConfirmar = document.getElementById('btnConfirmar');

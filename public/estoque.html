@@ -212,7 +212,30 @@ tr:hover{
 
 <script>
 function novaEntrada(){ alert("Entrada de estoque (em desenvolvimento)."); }
-function novaSaida(){ alert("Saída de estoque (em desenvolvimento)."); }
+function novaSaida() {
+  const evento = {
+    pedido_id: 'EPS-REAL-001',
+    etapa: 'CORTE',
+    tipo_evento: 'INICIO_CORTE',
+    descricao: 'Saída automática via tela estoque',
+    usuario: 'Produção'
+  };
+
+  fetch('/api/evento', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(evento)
+  })
+  .then(r => r.json())
+  .then(resp => {
+    alert('Evento registrado com sucesso!');
+    console.log(resp);
+  })
+  .catch(err => {
+    alert('Erro ao registrar evento');
+    console.error(err);
+  });
+}
 function ajusteManual(){ alert("Ajuste manual (em desenvolvimento)."); }
 function importarExcel(){ alert("Importar Excel (em desenvolvimento)."); }
 </script>

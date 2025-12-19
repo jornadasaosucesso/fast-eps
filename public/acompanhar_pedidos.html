@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Acompanhar Pedidos — FAST EPS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ 
+  startOnLoad: false, 
+  theme: 'dark',
+  flowchart: {
+    htmlLabels: true,
+    useMaxWidth: false, // 👈 ISSO impede que ele diminua de tamanho
+    nodeSpacing: 100,
+    rankSpacing: 80
+  }
+});
+  </script>
+
+  <style>
+    :root {
+      --bg: #0b0b0b;
+      --card: #0f0f0f;
+      --accent: #00e5ff;
+      --success: #00ff88;
+      --muted: #bfcbd0;
+    }
+    body {
+      margin: 0; padding: 16px;
+      background: var(--bg); color: #fff;
+      font-family: 'Inter', Arial, sans-serif;
+    }
+    h1 { color: var(--accent); margin-bottom: 20px; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    
+    label { font-size: 12px; color: var(--muted); margin-bottom: 4px; display: block; }
+    
+    select, button {
+      height: 48px;
+      border-radius: 12px;
+      border: none;
+      padding: 0 16px;
+      font-size: 15px;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+    
+    select { 
+        min-width: 260px; 
+        background: #fff; 
+        color: #000; 
+    }
+    
+    button {
+      background: var(--accent);
+      color: #000;
+      cursor: pointer;
+    }
+    
+    button:hover { opacity: 0.9; transform: translateY(-1px); }
+    button:disabled { background: #444; cursor: not-allowed; }
+
+#mermaid {
+  margin-top: 20px;
+  overflow-x: auto; /* Permite rolar para o lado se crescer demais */
+  overflow-y: hidden;
+  padding: 40px;
+  display: block; /* Mudamos de flex para block para o scroll funcionar melhor */
+  background: #0f0f0f;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+/* Deixa a barra de rolagem mais bonita (estilo dark) */
+#mermaid::-webkit-scrollbar {
+  height: 8px;
+}
+#mermaid::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 10px;
+}
+#mermaid::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+    /* Painel de Controle */
+    #painelAcoes {
+      margin-top: 16px;
+      border-left: 4px solid var(--accent);
+    }
+    .status-badge {
+        background: rgba(0, 229, 255, 0.1);
+        color: var(--accent);
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Acompanhar Pedidos</h1>
+
+<div class="row">
+  <div class="card">
+    <label>Selecione o Pedido</label>
+    <select id="pedidoSelect" onchange="limparVisualizacao()">
+        <option value="">Carregando pedidos...</option>
+    </select>
+  </div>
+
+  <div style="display: flex; align-items: flex-end;">
+    <button onclick="renderizarLinha()">🔎 Visualizar Detalhes</button>
+  </div>
+</div>
+
+<div id="painelAcoes" class="card" style="display: none;">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+          <span class="status-badge" id="txtStatusAtual">Status</span>
+          <h3 id="txtProximoPasso" style="margin: 8px 0 0 0;">Próxima Etapa</h3>
+      </div>
+      <button id="btnEvoluir" onclick="executarEvolucao()">Avançar Etapa ✅</button>
+  </div>
+</div>
+
+<div id="mermaid" class="card">
+    <p style="color: #666;">Selecione um pedido e clique em visualizar para ver a linha do tempo.</p>
+</div>
+
+<script>
+let eventos = [];
+let ultimoEventoSelecionado = null;
+
+// 1. CARREGAR CSV (COM TRATAMENTO DE ERRO)
+fetch('/dados/eventos.csv')
+  .then(r => r.text())
+  .then(csv => {
+    if(!csv.trim()) return;
+    const linhas = csv.trim().split('\n');
+    linhas.shift(); 
+
+    eventos = linhas.map(l => {
+      const cols = l.split(',');
+      return {
+        pedido_id: cols[1],
+        data_evento: cols[2],
+        etapa: cols[3],
+        tipo_evento: cols[4],
+        descricao: cols[5],
+        usuario: cols[6],
+        status_resultante: cols[9]
+      };
+    });
+    popularPedidos();
+  })
+  .catch(err => console.error("Erro ao carregar dados:", err));
+
+function popularPedidos(){
+  const sel = document.getElementById('pedidoSelect');
+  const ids = [...new Set(eventos.map(e => e.pedido_id))];
+  sel.innerHTML = '<option value="">Escolha um pedido...</option>' + 
+                  ids.reverse().map(p => `<option value="${p}">${p}</option>`).join('');
+}
+
+function limparVisualizacao() {
+    document.getElementById('painelAcoes').style.display = 'none';
+    document.getElementById('mermaid').innerHTML = '';
+}
+
+// 2. RENDERIZAR (GRANDE E REDONDO)
+function renderizarLinha(){
+  const pedidoId = document.getElementById('pedidoSelect').value;
+  if(!pedidoId) return;
+
+  const evs = eventos.filter(e => e.pedido_id === pedidoId);
+  ultimoEventoSelecionado = evs[evs.length - 1];
+
+  // Configuração do Estilo: border-radius para ficar redondo
+  let mer = 'flowchart LR\n';
+  mer += 'classDef pill fill:#1a1a1a,stroke:#00e5ff,stroke-width:2px,color:#fff,padding:20px,border-radius:50px;\n';
+
+  evs.forEach((e, i) => {
+    const id = `E${i}`;
+    
+    // FORMATO REDONDO: usamos ([ ])
+    // IMPORTANTE: Removemos quebras de linha dentro da string do Mermaid para evitar o erro #<Object>
+    const titulo = `<b>${e.tipo_evento}</b>`;
+    const desc = `${e.descricao}`;
+    const data = `📅 ${new Date(e.data_evento).toLocaleDateString('pt-BR')}`;
+    const user = `👤 ${e.usuario}`;
+
+    // Montamos o HTML em uma linha só para o Mermaid não quebrar
+    const htmlInterno = `"<div style='min-width:220px; padding:10px;'>${titulo}<br/><small>${desc}</small><hr style='border:0;border-top:1px solid #333;margin:8px 0;'/>${data}<br/>${user}</div>"`;
+
+    mer += `${id}(${htmlInterno})\n`;
+    mer += `class ${id} pill\n`; 
+    if(i > 0) mer += `E${i-1} --> ${id}\n`;
+  });
+
+  try {
+    const container = document.getElementById('mermaid');
+    container.innerHTML = `<div class="mermaid">${mer}</div>`;
+    
+    // Força a renderização
+    mermaid.run();
+    prepararPainelAcoes();
+  } catch (err) {
+    console.error("Erro na renderização do Mermaid:", err);
+    // Se der erro, mostra o texto puro para debug
+    document.getElementById('mermaid').innerText = "Erro ao gerar gráfico. Verifique o console.";
+  }
+}
+
+function prepararPainelAcoes() {
+  const painel = document.getElementById('painelAcoes');
+  const status = ultimoEventoSelecionado.tipo_evento;
+  let proximo = "";
+
+  if(status === 'VENDA_REALIZADA') proximo = "Iniciar Produção";
+  else if(status === 'PRODUÇÃO_INICIADA') proximo = "Finalizar Produção";
+  else if(status === 'PRODUTO_PRONTO') proximo = "Despachar Logística";
+  else if(status === 'SAIU_PARA_ENTREGA') proximo = "Confirmar Entrega Final";
+  else { painel.style.display = 'none'; return; }
+
+  document.getElementById('txtStatusAtual').innerText = `Status Atual: ${status}`;
+  document.getElementById('txtProximoPasso').innerText = `Próximo Passo: ${proximo}`;
+  painel.style.display = 'block';
+}
+
+async function executarEvolucao() {
+  const statusAtual = ultimoEventoSelecionado.tipo_evento;
+  let etapa, evento, desc;
+
+  if (statusAtual === 'VENDA_REALIZADA') { etapa='PRODUÇÃO'; evento='PRODUÇÃO_INICIADA'; desc='Placas em fabricação'; }
+  else if (statusAtual === 'PRODUÇÃO_INICIADA') { etapa='PRODUÇÃO'; evento='PRODUTO_PRONTO'; desc='Placas finalizadas'; }
+  else if (statusAtual === 'PRODUTO_PRONTO') { etapa='LOGÍSTICA'; evento='SAIU_PARA_ENTREGA'; desc='Carga em trânsito'; }
+  else if (statusAtual === 'SAIU_PARA_ENTREGA') { etapa='CONCLUÍDO'; evento='ENTREGUE_CONCLUIDO'; desc='Pedido finalizado'; }
+
+  const payload = {
+    pedido_id: ultimoEventoSelecionado.pedido_id,
+    etapa, tipo_evento: evento, descricao: desc,
+    usuario: 'operador_fast', custo: 0, receita: 0, meta: {}
+  };
+
+  const res = await fetch('/api/evento', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  if (res.ok) location.reload();
+}
+
+// A FUNÇÃO QUE ESTAVA FALTANDO!
+async function registrarEvento(evento){
+  const res = await fetch('/api/evento', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(evento)
+  });
+
+  const json = await res.json();
+  if(!json.sucesso) throw new Error('Falha no servidor');
+  return json;
+}
+</script>
+
+</body>
+</html>

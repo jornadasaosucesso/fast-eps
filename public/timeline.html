@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Linha do Tempo do Pedido EPS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+    .pedido {
+      margin-bottom: 20px;
+      padding: 12px;
+      background: #020617;
+      border-radius: 8px;
+    }
+    .status {
+      font-weight: bold;
+      color: #38bdf8;
+    }
+    .timeline {
+      border-left: 3px solid #334155;
+      margin-top: 20px;
+      padding-left: 20px;
+    }
+    .evento {
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .evento::before {
+      content: '';
+      position: absolute;
+      left: -32px;
+      top: 4px;
+      width: 14px;
+      height: 14px;
+      background: #38bdf8;
+      border-radius: 50%;
+    }
+    .evento .data {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .evento .etapa {
+      font-weight: bold;
+      margin-top: 2px;
+    }
+    .evento .descricao {
+      margin-top: 4px;
+    }
+    .evento .financeiro {
+      margin-top: 4px;
+      font-size: 13px;
+    }
+    .entrada { color: #22c55e; }
+    .saida { color: #ef4444; }
+  </style>
+</head>
+<body>
+
+  <h1>📄 Linha do Tempo do Pedido</h1>
+
+  <div class="pedido" id="infoPedido">
+    Pedido: <strong id="pedidoId">---</strong><br>
+    Status atual: <span class="status" id="statusPedido">---</span>
+  </div>
+
+  <div class="timeline" id="timeline"></div>
+
+  <script>
+    // ================================
+    // CONFIGURAÇÃO
+    // ================================
+    const PEDIDO_ID = 'EPS-1736629000000'; // trocar dinamicamente depois
+
+    document.getElementById('pedidoId').innerText = PEDIDO_ID;
+
+    // ================================
+    // CARREGAR EVENTOS
+    // ================================
+    async function carregarTimeline() {
+      const resp = await fetch(`/dados/timeline_eventos.csv`);
+      const texto = await resp.text();
+
+      const linhas = texto.trim().split('\n');
+      const eventos = linhas.slice(1)
+        .map(l => l.split(','))
+        .filter(col => col[1] === PEDIDO_ID)
+        .map(col => ({
+          data: col[2],
+          etapa: col[3],
+          tipo: col[4],
+          descricao: col[5],
+          custo: Number(col[7]),
+          receita: Number(col[8]),
+          status: col[9]
+        }));
+
+      renderizar(eventos);
+    }
+
+    // ================================
+    // RENDERIZAÇÃO
+    // ================================
+    function renderizar(eventos) {
+      const container = document.getElementById('timeline');
+      container.innerHTML = '';
+
+      if (eventos.length === 0) {
+        container.innerHTML = '<p>Nenhum evento encontrado.</p>';
+        return;
+      }
+
+      document.getElementById('statusPedido').innerText = eventos[eventos.length - 1].status;
+
+      eventos.forEach(ev => {
+        const div = document.createElement('div');
+        div.className = 'evento';
+
+        div.innerHTML = `
+          <div class="data">${ev.data}</div>
+          <div class="etapa">${ev.etapa} — ${ev.tipo}</div>
+          <div class="descricao">${ev.descricao}</div>
+          <div class="financeiro">
+            ${ev.receita > 0 ? `<span class="entrada">💰 Receita: R$ ${ev.receita.toFixed(2)}</span>` : ''}
+            ${ev.custo > 0 ? `<span class="saida"> | 💸 Custo: R$ ${ev.custo.toFixed(2)}</span>` : ''}
+          </div>
+        `;
+
+        container.appendChild(div);
+      });
+    }
+
+    carregarTimeline();
+  </script>
+
+</body>
+</html>

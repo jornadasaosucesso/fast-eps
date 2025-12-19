@@ -1,0 +1,20 @@
+tipo,chave,nome,fator,eps,tela,cimento,areia,aditivo,conectores,valor
+AREA_POR_PLACA,AREA_POR_PLACA,,,,,,,,,2
+receita,painel_p10_50g,Placa Interna 50G,0.07,15,1.1,48,18,0.02,0.8,
+receita,painel_p10_65g,Placa Externa 65G,0.08,15,1.1,50,19,0.022,1,
+insumo,eps,,,,,,,,,12.50
+insumo,tela,,,,,,,,,8.40
+insumo,cimento,,,,,,,,,0.75
+insumo,areia,,,,,,,,,0.12
+insumo,aditivo,,,,,,,,,22.00
+insumo,conectores,,,,,,,,,1.90
+parametro,custoOperacionalPorPlaca,,,,,,,,,18
+parametro,custosFixosMensais,,,,,,,,,8500
+parametro,producaoMensalEstimada,,,,,,,,,500
+parametro,margemPadrao,,,,,,,,,0.35
+estoque,eps,,,,,,,,,810
+estoque,tela,,,,,,,,,60
+estoque,cimento,,,,,,,,,2700
+estoque,areia,,,,,,,,,1020
+estoque,aditivo,,,,,,,,,1.2
+estoque,conectores,,,,,,,,,54
