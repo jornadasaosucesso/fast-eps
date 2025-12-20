@@ -1,0 +1,1 @@
+evento_id,pedido_id,data_evento,etapa,tipo_evento,descricao,usuario,custo,receita,status_resultante,data_entrega,p1_valor,p1_venc,p2_valor,p2_venc,p3_valor,p3_venc,cliente_nome,hh_teorico,corte,solda,acabamento

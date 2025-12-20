@@ -1,0 +1,6 @@
+parametro_id,categoria,item,valor,unidade,descricao
+1,MAO_DE_OBRA,operadores_corte,3,pessoas,Total de especialistas em corte
+2,MAO_DE_OBRA,operadores_solda,2,pessoas,Total de especialistas em solda
+3,MAO_DE_OBRA,operadores_acabamento,2,pessoas,Total de especialistas em acabamento
+4,CAPACIDADE,placas_hora_homem,8,placas,Meta de produção por homem/hora
+5,JORNADA,horas_diarias,8.8,horas,Horas úteis por dia de trabalho

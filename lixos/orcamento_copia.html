@@ -188,6 +188,37 @@ RESUMO OPERACIONAL
 </head>
 
 <body>
+<div id="overlayPlanejamento" class="overlay"></div>
+<div id="modalPlanejamento" class="card hidden">
+    <h2 style="color: var(--accent); margin-top:0">🏗️ Validação de Capacidade Operacional</h2>
+    <p><strong>Obra:</strong> <span id="planoCliente"></span></p>
+    
+    <div class="summary" style="background: rgba(255,165,0,0.1); border: 1px solid orange; color: orange;">
+        ⚠️ <b>Referência Técnica:</b> Este pedido exige <b><span id="hhRef"></span> HH</b> totais.
+    </div>
+
+    <div style="margin-top:15px">
+        <p style="font-size:13px; color: var(--muted)">Informe a alocação real para esta bancada:</p>
+        <div class="row">
+            <div class="campo">
+                <label>Qtd. Operadores CORTE</label>
+                <input type="number" id="qCorte" class="input-mini" placeholder="0">
+            </div>
+            <div class="campo">
+                <label>Qtd. Operadores SOLDA</label>
+                <input type="number" id="qSolda" class="input-mini" placeholder="0">
+            </div>
+        </div>
+        <div class="campo" style="margin-top:10px">
+            <label>Qtd. Apoio/ACABAMENTO</label>
+            <input type="number" id="qAcab" style="width:100%" placeholder="0">
+        </div>
+    </div>
+    
+    <button class="btn" style="width:100%; margin-top:20px" onclick="finalizarGenese()">
+        EU ASSUMO ESTE PLANO DE PRODUÇÃO ✅
+    </button>
+</div>
 
 <div class="wrap">
 <h1>Orçamento — FAST EPS</h1>
@@ -294,7 +325,6 @@ const receitas = {};
 const precoInsumos = {};
 const estoque = {};
 const tipoPlaca = document.getElementById('tipoPlaca');
-const equipe = {};
 
 let custoOperacionalPorPlaca = 0;
 let custosFixosMensais = 0;
@@ -308,18 +338,15 @@ Promise.all([
   fetch('/dados/insumos.csv').then(r => r.text()),
   fetch('/dados/estoque.csv').then(r => r.text()),
   fetch('/dados/parametros.csv').then(r => r.text()),
-  fetch('/dados/constantes.csv').then(r => r.text()),
-  fetch('/dados/equipe.csv').then(r => r.text()) // O 6º arquivo está aqui
+  fetch('/dados/constantes.csv').then(r => r.text())
 ])
-.then(([csvReceitas, csvInsumos, csvEstoque, csvParametros, csvConstantes, csvEquipe]) => {
-  // ADICIONEI 'csvEquipe' ACIMA ↑ NA LISTA DE ARGUMENTOS
+.then(([csvReceitas, csvInsumos, csvEstoque, csvParametros, csvConstantes]) => {
 
   carregarReceitas(csvReceitas);
   carregarInsumos(csvInsumos);
   carregarEstoque(csvEstoque);
   carregarParametros(csvParametros);
   carregarConstantes(csvConstantes);
-  carregarEquipe(csvEquipe); // Agora o 'csvEquipe' existe e o erro some!
 
   dadosCarregados = true;
 })
@@ -328,21 +355,6 @@ Promise.all([
   alert('Erro ao carregar dados');
 });
 
-/* ================= FUNÇÃO PARA CARREGAR EQUIPE ================= */
-function carregarEquipe(csv) {
-  const linhas = csv.trim().split('\n');
-  linhas.shift(); // Remove o cabeçalho
-
-  linhas.forEach(l => {
-    const [id, nome, funcao, etapas] = l.split(',');
-    equipe[id] = { 
-      nome: nome.trim(), 
-      funcao: funcao.trim(),
-      etapas: etapas.trim()
-    };
-  });
-  console.log("Equipe Fast EPS carregada:", equipe);
-}
 /* ================= HISTÓRICO INTERNO ================= */
 const historicoVendas = [];
 
@@ -649,25 +661,16 @@ html += `
     qtd,
     area,
     compras,
-    // --- ADICIONADO PARA O ACOMPANHAMENTO E MATEAR O ERRO ---
-    capacidade: {
-        max: cap.max,
-        gargalo: cap.gargalo,
-        // Usamos uma métrica base: qtd / constante de produtividade
-        // Isso gera os 12.5 HH que apareceram na sua foto
-        hhTotal: (qtd / 8).toFixed(1) 
-    },
-    // -------------------------------------------------------
     precificacao: {
-      custoDiretoPlaca: prec.custoDiretoPlaca,
-      custoPlaca: prec.custoPlaca,
-      precoPlaca: prec.precoPlaca,
-      lucroPlaca: prec.lucroPlaca,
-      custoTotal,
-      precoSugeridoTotal,
-      lucroTotal,
-      detalhesInsumos: prec.detalhesInsumos 
-    },
+           custoDiretoPlaca: prec.custoDiretoPlaca,
+           custoPlaca: prec.custoPlaca,
+           precoPlaca: prec.precoPlaca,
+           lucroPlaca: prec.lucroPlaca,
+           custoTotal,
+           precoSugeridoTotal,
+           lucroTotal,
+           detalhesInsumos: prec.detalhesInsumos 
+         },
     negociacao: {
       descontoAplicado: 0,
       precoFinal: precoSugeridoTotal,
@@ -680,74 +683,55 @@ html += `
   precoFinalEl.value = formatBR(precoSugeridoTotal);
 }
 
-async function confirmarVenda() {
-  if (btnConfirmar.disabled) return;
+async function confirmarVenda(){
+  if(btnConfirmar.disabled) return; 
   btnConfirmar.disabled = true;
 
-  const preco = parseBR(precoFinalEl.value);
+  const preco = parseBR(precoFinalEl.value); 
   const dataEntrega = dataEntregaEl.value;
   const custoReal = contextoAtual.precificacao.custoTotal;
   const lucroReal = preco - custoReal;
 
-  if (preco <= 0 || !dataEntrega) {
+  if(preco <= 0 || !dataEntrega){
     btnConfirmar.disabled = false;
-    return alert("Informe preço e data de entrega");
+    return alert("Informe preço e data");
   }
 
-  if (lucroReal < 0) {
-    if (!confirm("⚠️ Venda com prejuízo. Deseja continuar?")) {
+  if(lucroReal < 0){
+    if(!confirm("⚠️ Venda com prejuízo. Deseja continuar?")){
       btnConfirmar.disabled = false;
       return;
     }
   }
 
-  const pedidoId = `PED-${Date.now()}`;
-
-  // Criamos o objeto que vai para o CSV do Portal 💎
-  const novoEvento = {
-    pedido_id: pedidoId,
-    tipo_evento: 'VENDA_REALIZADA',
-    etapa: 'VENDA',
-    cliente_nome: contextoAtual.cliente,
-    desc_placa: receitas[contextoAtual.produto].nome,
-    qtde_placa: contextoAtual.qtd,
-    hh_teorico: contextoAtual.capacidade.hhTotal,
-    receita: preco,
-    data_entrega: dataEntrega,
-
-    corte: 0,
-    solda: 0,
-    acabamento: 0,
-    data_evento: new Date().toISOString()
+  const venda = {
+    ...contextoAtual,
+    preco,
+    dataEntrega,
+    data: new Date().toISOString()
   };
 
+  const pedidoId = `PED-${Date.now()}`;
+
   try {
-    // 1. Gera o PDF para o cliente
-    gerarPDF({...contextoAtual, preco, dataEntrega});
+    // 1. Gera o PDF
+    gerarPDF(venda);
+    
+    // 2. Abre a Gênese (O Modal que criamos)
+    abrirGenese(venda, pedidoId);
 
-    // 2. SALVA NO SERVIDOR (Substitui o abrirGenese)
-    const response = await fetch('/api/eventos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(novoEvento)
-    });
+    // 3. Salva no histórico local
+    historicoVendas.push(venda);
 
-    if (response.ok) {
-      alert("✅ Venda Registrada! Agora vá em 'Acompanhar Pedidos' para validar a produção.");
-      window.location.href = "index.html";
-    } else {
-      throw new Error("Falha ao salvar no servidor");
-    }
-
-  } catch (err) {
+  } catch(err) {
     console.error(err);
-    alert("❌ Erro ao salvar pedido.");
+    alert("❌ Erro ao processar venda.");
     btnConfirmar.disabled = false;
   }
-}
+} // <--- FECHAMENTO DA FUNÇÃO (Confira se essa chave está aí)
 
 async function registrarEvento(evento){
-  const res = await fetch('/api/eventos', {
+  const res = await fetch('/api/evento', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(evento)
@@ -1050,6 +1034,68 @@ aplicarMascaraMonetaria(precoFinalEl);
 // VARIÁVEL GLOBAL PARA O EVENTO
 let eventoPendente = null;
 
+async function abrirGenese(venda, pedidoId) {
+    const placasHoraHomem = 8; 
+    const hhNecessario = (venda.qtd / placasHoraHomem).toFixed(1);
+
+    document.getElementById('planoCliente').innerText = venda.cliente;
+    document.getElementById('hhRef').innerText = hhNecessario; // Apenas exibe a referência
+    
+    // Zera os inputs para forçar a digitação
+    document.getElementById('qCorte').value = "";
+    document.getElementById('qSolda').value = "";
+    document.getElementById('qAcab').value = "";
+
+    eventoPendente = { venda, pedidoId, hhNecessario };
+
+    document.getElementById('overlayPlanejamento').style.display = 'block';
+    document.getElementById('modalPlanejamento').classList.remove('hidden');
+}
+
+async function finalizarGenese() {
+    const p = eventoPendente;
+    
+    // Captura os valores
+    const qCorte = document.getElementById('qCorte').value;
+    const qSolda = document.getElementById('qSolda').value;
+    const qAcab = document.getElementById('qAcab').value;
+
+    // A TRAVA PSICOLÓGICA: Não aceita vazio ou zero
+    if (!qCorte || !qSolda || !qAcab || qCorte <= 0 || qSolda <= 0 || qAcab <= 0) {
+        alert("⚠️ ATENÇÃO ENGENHEIRO:\n\nVocê precisa definir a equipe real para este projeto. O sistema não aceita alocação zerada. Pense na bancada de produção antes de confirmar.");
+        return; // Interrompe o envio
+    }
+// Cálculo de sanidade
+const totalAlocado = Number(qCorte) + Number(qSolda) + Number(qAcab);
+const horasEstimadas = (p.hhNecessario / totalAlocado).toFixed(1);
+
+    if (horasEstimadas > 8.8) { // Se levar mais de um dia inteiro com essa equipe
+        if(!confirm(`🚨 ALERTA DE PRAZO:\n\nCom apenas ${totalAlocado} pessoas, este pedido levará aprox. ${horasEstimadas} horas de bancada.\nIsso pode impactar a entrega final. Deseja manter essa alocação?`)) {
+            return; 
+        }
+    }
+
+    const payload = {
+        pedido_id: p.pedidoId,
+        etapa: 'VENDA',
+        tipo_evento: 'VENDA_REALIZADA',
+        descricao: `Projeto validado para ${p.venda.cliente}`,
+        usuario: 'gestor_engenharia', // Aqui fica registrado quem assinou
+        custo: p.venda.precificacao.custoTotal,
+        receita: p.venda.preco,
+        cliente_nome: p.venda.cliente,
+        meta: { data_entrega: p.venda.dataEntrega },
+        parametros_planta: { 
+            hh_teorico: p.hhNecessario, 
+            alocacao_real: { corte: qCorte, solda: qSolda, acabamento: qAcab } 
+        }
+    };
+
+    await registrarEvento(payload);
+    
+    alert("✅ PLANO DE ATAQUE REGISTRADO!\n\nA responsabilidade pela alocação foi salva no histórico do pedido.");
+    location.reload();
+}
 function calcularCorNo(evento) {
     const hhTeorico = evento.parametros_planta.hh_teorico;
     const alocacao = evento.parametros_planta.alocacao_real;

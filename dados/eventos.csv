@@ -1,6 +1,11 @@
-evento_id,pedido_id,data_evento,etapa,tipo_evento,descricao,usuario,custo,receita,status_resultante,meta
-1766104677200,PED-1766104677195,2025-12-19T00:37:57.200Z,VENDA,VENDA_REALIZADA,Venda de 18 placas undefined para JORGE PARA TESTE DA META,vendedor_1,5191.92,7009.10,EM_PRODUCAO,{"data_entrega":"2026-01-22";"financeiro":{"regra":"3x_FIXA_NORMA_CASA";"valor_total":"7009.10";"parcelas":[{"n":1;"valor":"2336.37";"vencimento":"30_DIAS"};{"n":2;"valor":"2336.37";"vencimento":"60_DIAS"};{"n":3;"valor":"2336.36";"vencimento":"90_DIAS"}]}}
-1766105180785,PED-1766104677195,2025-12-19T00:46:20.785Z,PRODUÇÃO,PRODUÇÃO_INICIADA,Placas em fabricação,operador_fast,0.00,0.00,EM_PRODUCAO,{}
-1766105190633,PED-1766104677195,2025-12-19T00:46:30.633Z,PRODUÇÃO,PRODUTO_PRONTO,Placas finalizadas,operador_fast,0.00,0.00,EM_PRODUCAO,{}
-1766105195637,PED-1766104677195,2025-12-19T00:46:35.637Z,LOGÍSTICA,SAIU_PARA_ENTREGA,Carga em trânsito,operador_fast,0.00,0.00,EM_PRODUCAO,{}
-1766105201733,PED-1766104677195,2025-12-19T00:46:41.733Z,CONCLUÍDO,ENTREGUE_CONCLUIDO,Pedido finalizado,operador_fast,0.00,0.00,EM_PRODUCAO,{}
+evento_id,pedido_id,data_evento,etapa,tipo_evento,desc_placa,qtde_placa,descricao,usuario,custo,receita,status_resultante,data_entrega,p1_valor,p1_venc,p2_valor,p2_venc,p3_valor,p3_venc,cliente_nome,hh_teorico,corte,solda,acabamento,resp_corte,resp_solda,resp_acabe,resp_conferencia
+1766250632720,PED-1766250632700,2025-12-20T17:10:32.720Z,VENDA,VENDA_REALIZADA,Placa Externa 65G,15,Avanco automatico,gestor,0.00,5933.58,,2025-12-27,,,,,,,Edificio San Demetrius,1.9,0,0,0,Filipe,Equipe,Elton,Sergio
+1766251168406,PED-1766250632700,2025-12-20T17:19:28.406Z,PRODUCAO,PLANEJAMENTO_CONCLUIDO,,0,Avanco automatico,gestor,0.00,5933.58,,2025-12-27,,,,,,,Edificio San Demetrius,1.9,1,1,1, CORTE ,Equipe, ACABAMENTO , PÁTIO 
+1766251401590,PED-1766251401570,2025-12-20T17:23:21.590Z,VENDA,VENDA_REALIZADA,Placa Interna 50G,9,Avanco automatico,gestor,0.00,3504.55,,2025-12-27,,,,,,,Edificio San Peter,1.1,0,0,0,Filipe,Equipe,Elton,Sergio
+1766251412510,PED-1766251401570,2025-12-20T17:23:32.510Z,PRODUCAO,PLANEJAMENTO_CONCLUIDO,,0,Avanco automatico,gestor,0.00,3504.55,,2025-12-27,,,,,,,Edificio San Peter,1.1,1,1,1, CORTE ,Equipe, ACABAMENTO , PÁTIO 
+1766252113895,PED-1766252113872,2025-12-20T17:35:13.895Z,VENDA,VENDA_REALIZADA,Placa Externa 65G,145,Avanco automatico,gestor,0.00,57357.94,,2026-01-10,,,,,,,Edificio San Demetrius,18.1,0,0,0,Filipe,Equipe,Elton,Sergio
+1766252123691,PED-1766252113872,2025-12-20T17:35:23.691Z,PRODUCAO,PLANEJAMENTO_CONCLUIDO,,0,Avanco automatico,gestor,0.00,57357.94,,2026-01-10,,,,,,,Edificio San Demetrius,18.1,1,1,1, CORTE ,Equipe, ACABAMENTO , PÁTIO 
+1766252151268,PED-1766252113872,2025-12-20T17:35:51.268Z,PRODUCAO,PRODUCAO_INICIADA,Placa Externa 65G,145,Avanco automatico,gestor,0.00,57357.94,,2026-01-10,,,,,,,Edificio San Demetrius,18.1,1,1,1,Filipe,Equipe,Elton,Sergio
+1766252373429,PED-1766252373412,2025-12-20T17:39:33.429Z,VENDA,VENDA_REALIZADA,Placa Externa 65G,23,Avanco automatico,gestor,0.00,9098.16,,2025-12-27,,,,,,,Edificio San Demetrius,2.9,0,0,0,Filipe,Equipe,Elton,Sergio
+1766252707830,PED-1766252373412,2025-12-20T17:45:07.830Z,PRODUCAO,PLANEJAMENTO_CONCLUIDO,,0,Avanco automatico,gestor,0.00,9098.16,,2025-12-27,,,,,,,Edificio San Demetrius,2.9,1,1,1, CORTE ,Equipe, ACABAMENTO , PÁTIO 
+1766252734492,PED-1766252373412,2025-12-20T17:45:34.492Z,PRODUCAO,PRODUCAO_INICIADA,Placa Externa 65G,23,Avanco automatico,gestor,0.00,9098.16,,2025-12-27,,,,,,,Edificio San Demetrius,2.9,1,1,1,Filipe,Equipe,Elton,Sergio

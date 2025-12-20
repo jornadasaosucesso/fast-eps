@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Acompanhar Pedidos — FAST EPS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ 
+      startOnLoad: false, 
+      theme: 'dark',
+      securityLevel: 'loose', 
+      flowchart: { htmlLabels: true, useMaxWidth: false, nodeSpacing: 100, rankSpacing: 80 }
+    });
+  </script>
+
+  <style>
+    :root { --bg: #0b0b0b; --card: #0f0f0f; --accent: #00e5ff; --success: #00ff88; --muted: #bfcbd0; }
+    body { margin: 0; padding: 16px; background: var(--bg); color: #fff; font-family: 'Inter', Arial, sans-serif; }
+    h1 { color: var(--accent); margin-bottom: 20px; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .card { background: var(--card); border-radius: 14px; padding: 16px; border: 1px solid rgba(255,255,255,.08); }
+    label { font-size: 12px; color: var(--muted); margin-bottom: 4px; display: block; }
+    select, button { height: 48px; border-radius: 12px; border: none; padding: 0 16px; font-size: 15px; font-weight: 600; transition: 0.2s; }
+    select { min-width: 260px; background: #fff; color: #000; }
+    button { background: var(--accent); color: #000; cursor: pointer; }
+    button:hover { opacity: 0.9; transform: translateY(-1px); }
+    #mermaid { margin-top: 20px; overflow-x: auto; padding: 40px; background: #0f0f0f; border-radius: 14px; border: 1px solid rgba(255,255,255,.08); min-height: 300px;}
+    .status-badge { background: rgba(0, 229, 255, 0.1); color: var(--accent); padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: bold; }
+    #overlayModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9998; }
+  </style>
+</head>
+
+<body>
+<h1>Acompanhar Pedidos</h1>
+
+<div class="row">
+  <div class="card">
+    <label>Selecione o Pedido</label>
+    <select id="pedidoSelect" onchange="limparVisualizacao()">
+        <option value="">Carregando pedidos...</option>
+    </select>
+  </div>
+  <div style="display: flex; align-items: flex-end;">
+    <button onclick="renderizarLinha()">🔎 Visualizar Detalhes</button>
+  </div>
+</div>
+
+<div id="painelAcoes" class="card" style="display: none; margin-bottom: 16px; border-left: 4px solid var(--accent);">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+          <span class="status-badge" id="txtStatusAtual">Status</span>
+          <h3 id="txtProximoPasso" style="margin: 8px 0 0 0;">Próxima Etapa</h3>
+      </div>
+      <button id="btnEvoluir" onclick="executarEvolucao()">Avançar Etapa ✅</button>
+  </div>
+</div>
+
+<div id="mermaid">
+    <p style="color: #666;">Selecione um pedido para ver a linha do tempo.</p>
+</div>
+
+<div id="overlayModal" onclick="fecharModal()"></div>
+<div id="modalDetalhes" class="card" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10000; width:95%; max-width:600px; background:#0b0b0b; border: 2px solid var(--accent); box-shadow: 0 0 100px rgba(0,229,255,0.2);">
+    <div style="display:flex; justify-content:space-between; align-items:center; padding: 20px; border-bottom: 1px solid #333;">
+        <h2 style="margin:0; color:var(--accent); font-size:1.2rem;">💎 Gênese do Projeto: <span id="detClienteTitle"></span></h2>
+        <button onclick="fecharModal()" style="background:none; border:none; color:#fff; font-size:30px; cursor:pointer;">&times;</button>
+    </div>
+    <div style="padding: 20px; max-height: 70vh; overflow-y: auto;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div class="card" style="background:rgba(0,229,255,0.05);">
+                <label>VALOR DO CONTRATO</label>
+                <h3 id="detReceita" style="color:var(--success); margin:5px 0;">R$ 0,00</h3>
+            </div>
+            <div class="card" style="background:rgba(255,255,255,0.05);">
+                <label>DATA DE ENTREGA</label>
+                <h3 id="detEntrega" style="color:#fff; margin:5px 0;">--/--/--</h3>
+            </div>
+        </div>
+        <div class="card" style="margin-bottom: 20px; border-left: 4px solid var(--accent);">
+            <h4 style="margin:0 0 10px 0; color:var(--muted);">⚙️ CAPACIDADE TÉCNICA</h4>
+            <div style="display:flex; justify-content:space-between; font-size:14px;">
+                <span>Esforço Previsto (HH):</span>
+                <b id="detHH" style="color:var(--accent);">0.0</b>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:14px; margin-top:5px;">
+                <span>Alocação (C+S+A):</span>
+                <b id="detEquipe">0 Operadores</b>
+            </div>
+        </div>
+        <div id="areaRiscoModal" style="display:none; padding:15px; border-radius:12px; background:rgba(255,152,0,0.1); border: 1px solid #ff9800;">
+            <h4 style="margin:0; color:#ff9800;">⚠️ ALERTA DE GARGALO</h4>
+            <p id="msgRiscoModal" style="margin:8px 0 0 0; font-size:13px; line-height:1.4;"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+let eventos = [];
+let ultimoEventoSelecionado = null;
+
+fetch('/dados/eventos.csv')
+  .then(r => r.text())
+  .then(csv => {
+    if(!csv.trim()) return;
+    const linhas = csv.trim().split('\n');
+    linhas.shift(); // Remove o cabeçalho
+
+    eventos = linhas.map(l => {
+        const c = l.split(',');
+        
+        // Se a linha estiver vazia ou malformada, ignora para não dar erro
+        if (c.length < 10) return null;
+
+        return {
+            id: c[0],                    // evento_id
+            pedido_id: c[1],             // pedido_id
+            data_evento: c[2],           // data_evento
+            etapa: c[3],                 // etapa
+            tipo_evento: c[4],           // tipo_evento
+            descricao: c[5],             // descricao
+            usuario: c[6],               // usuario
+            custo: c[7],                 // custo
+            receita: c[8],               // receita
+            status_resultante: c[9],     // status
+            data_entrega: c[10],         // data_entrega
+            
+            // O "pulo do gato": Índices 17 a 21
+            cliente_nome: (c[17] || "Não Informado").trim(), 
+            hh_teorico: parseFloat(c[18]) || 0,
+            corte: parseInt(c[19]) || 0,
+            solda: parseInt(c[20]) || 0,
+            acabamento: parseInt(c[21]) || 0
+        };
+    }).filter(e => e !== null); // Remove linhas inválidas
+
+    popularPedidos();
+  })
+    .catch(err => console.error("Erro ao carregar CSV:", err));
+
+function popularPedidos(){
+  const sel = document.getElementById('pedidoSelect');
+  const ids = [...new Set(eventos.map(e => e.pedido_id))];
+  sel.innerHTML = '<option value="">Escolha um pedido...</option>' + 
+                  ids.reverse().map(p => `<option value="${p}">${p}</option>`).join('');
+}
+
+// Adicione esta função ao seu script
+function fecharModal() {
+    document.getElementById('modalDetalhes').style.display = 'none';
+}
+
+function limparVisualizacao() {
+    document.getElementById('painelAcoes').style.display = 'none';
+    const m = document.getElementById('mermaid');
+    if(m) m.innerHTML = '';
+}
+
+async function renderizarLinha() {
+    const pedidoId = document.getElementById('pedidoSelect').value;
+    if (!pedidoId) return;
+
+    const evs = eventos.filter(e => e.pedido_id === pedidoId);
+    if (evs.length === 0) return;
+    
+    ultimoEventoSelecionado = evs[evs.length - 1];
+
+    let mer = 'flowchart LR\n';
+    mer += 'classDef pill fill:#1a1a1a,stroke:#00e5ff,stroke-width:2px,color:#fff;\n';
+
+    evs.forEach((e, i) => {
+        const nodeID = `E${i}`;
+        
+        // Tratamento dos dados (plano)
+        const corte = Number(e.corte) || 0;
+        const solda = Number(e.solda) || 0;
+        const acab  = Number(e.acabamento) || 0;
+        const hh    = Number(e.hh_teorico) || 0;
+        const totalGente = corte + solda + acab;
+        const horasEstimadas = totalGente > 0 ? (hh / totalGente).toFixed(1) : 0;
+
+        let alertaTexto = "";
+        if (hh > 0) {
+            if (parseFloat(horasEstimadas) > 8.8) {
+                alertaTexto = `<br/><span style='color:#ff9800;'>⚠️ RISCO: ${horasEstimadas}h</span>`;
+            } else {
+                alertaTexto = `<br/><span style='color:#00ff88;'>✅ Fluxo OK: ${horasEstimadas}h</span>`;
+            }
+        }
+
+        const dataFmt = new Date(e.data_evento).toLocaleDateString('pt-BR');
+        const tipoLimpo = (e.tipo_evento || '').replace(/_/g, ' ');
+
+        // ATENÇÃO: A string abaixo deve ser uma LINHA ÚNICA dentro do Mermaid
+        // Usamos <br/> para pular linha, não o ENTER do teclado.
+        const label = `"${tipoLimpo}<br/>🏢 ${e.cliente_nome}<br/>📅 ${dataFmt}${alertaTexto}"`;
+
+        mer += `  ${nodeID}(${label})\n`;
+        mer += `  class ${nodeID} pill\n`;
+        mer += `  click ${nodeID} abrirDetalhesPedido\n`;
+        
+        if (i > 0) mer += `  E${i-1} --> ${nodeID}\n`;
+    });
+
+try {
+        const container = document.getElementById('mermaid');
+        
+        // 1. Limpa tudo e remove marcas de processamento antigo
+        container.removeAttribute('data-processed');
+        container.innerHTML = mer;
+
+        // 2. DISPARO MANUAL (O "PULO DO GATO")
+        // Se estiver usando a versão moderna do Mermaid (v10+)
+        if (typeof mermaid !== 'undefined') {
+            await mermaid.run({
+                nodes: [container]
+            });
+        }
+        prepararPainelAcoes();
+    } catch (err) {
+        console.error("Erro ao renderizar gráfico:", err);
+        // Fallback: se o run() falhar, tentamos o init antigo
+        try { mermaid.init(undefined, document.querySelectorAll('.mermaid')); } catch(e) {}
+    }
+  }
+
+window.abrirDetalhesPedido = function(id) {
+    const pedidoId = document.getElementById('pedidoSelect').value;
+    if (!pedidoId) return;
+
+    // Busca o evento no array 'eventos' (que já foi carregado do CSV)
+    const ev = eventos.find(e => e.pedido_id === pedidoId && e.tipo_evento === 'VENDA_REALIZADA') 
+            || eventos.find(e => e.pedido_id === pedidoId);
+    
+    if (!ev) {
+        alert("Dados do pedido não encontrados.");
+        return;
+    }
+
+    // --- ENCAPSULAMENTO E TRATAMENTO DOS DADOS CRUS ---
+    // Convertemos os textos do CSV em números reais para o cálculo
+    const hhPrevisto = parseFloat(ev.hh_teorico) || 0;
+    const equipeCorte = parseInt(ev.corte) || 0;
+    const equipeSolda = parseInt(ev.solda) || 0;
+    const equipeAcab  = parseInt(ev.acabamento) || 0;
+    
+    const totalGente = equipeCorte + equipeSolda + equipeAcab;
+    const horasEstimadas = totalGente > 0 ? (hhPrevisto / totalGente).toFixed(1) : 0;
+
+    // --- ALIMENTANDO A TELA (MODAL) ---
+    // IDs devem bater com o seu HTML
+    document.getElementById('detClienteTitle').innerText = ev.cliente_nome || "Cliente não identificado";
+    document.getElementById('detReceita').innerText      = `R$ ${parseFloat(ev.receita).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('detEntrega').innerText      = ev.data_entrega ? new Date(ev.data_entrega).toLocaleDateString('pt-BR') : "A confirmar";
+    document.getElementById('detHH').innerText           = hhPrevisto.toFixed(1) + " horas";
+    document.getElementById('detEquipe').innerText        = `${totalGente} Operadores (C:${equipeCorte} | S:${equipeSolda} | A:${equipeAcab})`;
+
+    // --- LÓGICA DE RISCO DO PORTAL 💎 ---
+    const areaRisco = document.getElementById('areaRiscoModal');
+    if (areaRisco) {
+        if (parseFloat(horasEstimadas) > 8.8) {
+            areaRisco.style.backgroundColor = 'rgba(255, 152, 0, 0.1)';
+            areaRisco.style.border = '1px solid #ff9800';
+            areaRisco.style.display = 'block';
+            document.getElementById('msgRiscoModal').innerHTML = `
+                <b style="color:#ff9800;">⚠️ ALERTA DE SOBRECARGA</b><br/>
+                O projeto <b>${ev.cliente_nome}</b> exige ${hhPrevisto}h nominais.<br/>
+                Com sua equipe atual de ${totalGente} pessoas, o turno será de <b>${horasEstimadas}h</b>.<br/>
+                Isso excede o limite operacional de 8.8h!
+            `;
+        } else {
+            areaRisco.style.display = 'none';
+        }
+    }
+
+    // EXIBE O MODAL
+    const modal = document.getElementById('modalDetalhes');
+    if (modal) modal.style.display = 'flex'; // ou 'block'
+    document.getElementById('modalDetalhes').style.display = 'block';
+};
+
+function prepararPainelAcoes() {
+    if (!ultimoEventoSelecionado) return;
+
+    const painel = document.getElementById('painelAcoes');
+    const txtStatus = document.getElementById('txtStatusAtual');
+    const txtProximo = document.getElementById('txtProximoPasso');
+
+    // Define o texto amigável do status atual
+    const statusAtual = ultimoEventoSelecionado.tipo_evento;
+    txtStatus.innerText = statusAtual.replace(/_/g, ' ');
+
+    // Define qual será a próxima etapa lógica
+    let proxima = "";
+    if (statusAtual === 'VENDA_REALIZADA') proxima = 'PRODUCAO_INICIADA';
+    else if (statusAtual === 'PRODUCAO_INICIADA') proxima = 'PRODUTO_PRONTO';
+    else if (statusAtual === 'PRODUTO_PRONTO') proxima = 'SAIDA_EXPEDICAO';
+    else {
+        txtProximo.innerText = "Pedido Finalizado! 🏁";
+        document.getElementById('btnEvoluir').style.display = 'none';
+        painel.style.display = 'block';
+        return;
+    }
+
+    txtProximo.innerText = "Próximo Passo: " + proxima.replace(/_/g, ' ');
+    document.getElementById('btnEvoluir').style.display = 'block';
+    painel.style.display = 'block';
+}
+
+async function executarEvolucao() {
+    if (!ultimoEventoSelecionado) return;
+
+    // Lógica de destino
+    const atual = ultimoEventoSelecionado.tipo_evento;
+    let proxima = "";
+    if (atual === 'VENDA_REALIZADA') proxima = 'PRODUCAO_INICIADA';
+    else if (atual === 'PRODUCAO_INICIADA') proxima = 'PRODUTO_PRONTO';
+    else if (atual === 'PRODUTO_PRONTO') proxima = 'SAIDA_EXPEDICAO';
+
+    if (!confirm(`Confirmar avanço para ${proxima.replace(/_/g, ' ')}?`)) return;
+
+    // Criamos o novo objeto mantendo o DNA do projeto (cliente, HH, etc)
+    const novoEvento = {
+        pedido_id: ultimoEventoSelecionado.pedido_id,
+        tipo_evento: proxima,
+        data_evento: new Date().toISOString(),
+        cliente_nome: ultimoEventoSelecionado.cliente_nome,
+        hh_teorico: ultimoEventoSelecionado.hh_teorico,
+        corte: ultimoEventoSelecionado.corte,
+        solda: ultimoEventoSelecionado.solda,
+        acabamento: ultimoEventoSelecionado.acabamento,
+        receita: ultimoEventoSelecionado.receita,
+        data_entrega: ultimoEventoSelecionado.data_entrega
+    };
+
+    try {
+        const response = await fetch('/api/eventos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(novoEvento)
+        });
+
+        if (response.ok) {
+            alert("Etapa atualizada! O gráfico será atualizado.");
+            location.reload(); // Recarrega para ver o novo balão no Mermaid
+        }
+    } catch (err) {
+        alert("Erro ao salvar evolução.");
+        console.error(err);
+    }
+}
+
+</script>
+</body>
+</html>

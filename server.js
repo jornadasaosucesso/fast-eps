@@ -3,86 +3,87 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// --- CONFIGURAÇÃO DE DIRETÓRIOS ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// No Render, process.cwd() é a raiz.
 const ROOT = process.cwd(); 
-
 const PORT = process.env.PORT || 8000;
 
-// Caminhos dos arquivos de dados
-
-// Caminhos exatos conforme seu git ls-tree
 const EVENTOS_CSV = path.join(ROOT, 'dados', 'eventos.csv');
-const RECEITAS_JSON = path.join(ROOT, 'receitas_composicao.json'); // ESTAVA SEM O 'S' E FORA DA PASTA DADOS
-const PUBLIC_DIR = path.join(ROOT, 'public');
+const EQUIPE_CSV = path.join(ROOT, 'dados', 'equipe.csv');
 const DADOS_DIR  = path.join(ROOT, 'dados');
+const PUBLIC_DIR = path.join(ROOT, 'public');
 
 const server = http.createServer(async (req, res) => {
     try {
         const urlPath = decodeURIComponent(req.url.split('?')[0]);
 
-        /* =========================
-            API — REGISTRAR EVENTO
-        ========================= */
-        if (req.method === 'POST' && urlPath === '/api/evento') {
-            let body = '';
-            req.on('data', chunk => body += chunk);
-            req.on('end', () => {
-                let evento;
-                try {
-                    evento = JSON.parse(body);
-                } catch (err) {
-                    res.writeHead(400);
-                    return res.end('JSON inválido');
-                }
-
-                let { pedido_id, etapa, tipo_evento, descricao, usuario, custo = 0, receita = 0, meta = {} } = evento;
-
-                if (tipo_evento === 'VENDA_REALIZADA' && receita > 0) {
-                    const valorParcela = (Number(receita) / 3).toFixed(2);
-                    meta.financeiro = {
-                        regra: "3x_FIXA_NORMA_CASA",
-                        valor_total: Number(receita).toFixed(2),
-                        parcelas: [
-                            { n: 1, valor: valorParcela, vencimento: "30_DIAS" },
-                            { n: 2, valor: valorParcela, vencimento: "60_DIAS" },
-                            { n: 3, valor: (receita - (valorParcela * 2)).toFixed(2), vencimento: "90_DIAS" }
-                        ]
-                    };
-                }
-
-                if (!fs.existsSync(DADOS_DIR)) fs.mkdirSync(DADOS_DIR, { recursive: true });
-
-                if (!fs.existsSync(EVENTOS_CSV)) {
-                    fs.writeFileSync(EVENTOS_CSV, 'evento_id,pedido_id,data_evento,etapa,tipo_evento,descricao,usuario,custo,receita,status_resultante,meta\n');
-                }
-
-                const linha = [
-                    Date.now(),
-                    pedido_id,
-                    new Date().toISOString(),
-                    etapa,
-                    tipo_evento,
-                    descricao ? descricao.replace(/,/g, ' ') : '',
-                    usuario,
-                    Number(custo).toFixed(2),
-                    Number(receita).toFixed(2),
-                    'EM_PRODUCAO',
-                    JSON.stringify(meta).replace(/,/g, ';')
-                ].join(',') + '\n';
-
-                fs.appendFileSync(EVENTOS_CSV, linha);
-
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ sucesso: true }));
-            });
-            return;
+/* =========================
+    API — REGISTRAR EVENTO (Expandida para Equipe Real)
+========================= */
+if (req.method === 'POST' && urlPath === '/api/eventos') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+        let ev;
+        try {
+            ev = JSON.parse(body);
+        } catch (err) {
+            res.writeHead(400);
+            return res.end('JSON inválido');
         }
 
-        /* =========================
+        if (!fs.existsSync(DADOS_DIR)) fs.mkdirSync(DADOS_DIR, { recursive: true });
+
+        // Garante cabeçalho com 26 campos (incluindo nomes dos responsáveis)
+        if (!fs.existsSync(EVENTOS_CSV)) {
+            const cabecalho = [
+                'evento_id', 'pedido_id', 'data_evento', 'etapa', 'tipo_evento','desc_placa', 'qtde_placa', 
+                'descricao', 'usuario', 'custo', 'receita', 'status_resultante',
+                'data_entrega', 'p1_valor', 'p1_venc', 'p2_valor', 'p2_venc', 
+                'p3_valor', 'p3_venc', 'cliente_nome', 
+                'hh_teorico', 'corte', 'solda', 'acabamento',
+                'resp_corte', 'resp_solda', 'resp_acab', 'resp_conferencia' // <--- NOVAS COLUNAS
+            ].join(',') + '\n';
+            fs.writeFileSync(EVENTOS_CSV, cabecalho);
+        }
+
+        // MONTAGEM DA LINHA - Agora aceitando nomes reais conforme o seu PDF
+        const campos = [
+            Date.now(),                                 // 0: evento_id
+            ev.pedido_id,                               // 1: pedido_id
+            new Date().toISOString(),                   // 2: data_evento
+            ev.etapa || 'PRODUCAO',                     // 3: etapa
+            ev.tipo_evento,                             // 4: tipo_evento
+            (ev.desc_placa || '').replace(/,/g, ' '), // desc_placa
+            ev.qtde_placa || 0,                       // qtde_placa
+            (ev.descricao || 'Avanco automatico').replace(/,/g, ' '), // 5: desc
+         
+            ev.usuario || 'gestor',                     // 6: usuario
+            Number(ev.custo || 0).toFixed(2),           // 7: custo
+            Number(ev.receita || 0).toFixed(2),         // 8: receita
+            ev.status_resultante || '',                 // 9: status
+            ev.data_entrega || '',                      // 10: entrega
+            '', '', '', '', '', '',                     // 11-16: parcelas
+            (ev.cliente_nome || '').replace(/,/g, ' '), // 17: cliente
+            ev.hh_teorico || 0,                         // 18: hh
+            ev.corte || 0,                              // 19: num_op_corte
+            ev.solda || 0,                              // 20: num_op_solda
+            ev.acabamento || 0,                         // 21: num_op_acab
+            (ev.responsavel_corte || 'Filipe'),         // 22: NOME Real [cite: 3]
+            (ev.responsavel_solda || 'Equipe'),         // 23: NOME Real
+            (ev.responsavel_acabamento || 'Elton'),    // 24: NOME Real [cite: 3]
+            (ev.conferencia_final || 'Sergio')          // 25: NOME Real 
+        ];
+
+        fs.appendFileSync(EVENTOS_CSV, campos.join(',') + '\n');
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ sucesso: true }));
+    });
+    return;
+}
+
+/* =========================
             SERVIR ARQUIVOS ESTÁTICOS
         ========================= */
         const tipos = {
@@ -100,7 +101,6 @@ const server = http.createServer(async (req, res) => {
             ? path.join(PUBLIC_DIR, 'index.html')
             : path.join(PUBLIC_DIR, urlPath);
 
-        // Fallback para a pasta dados se não estiver na public
         if (!fs.existsSync(filePath) && urlPath.startsWith('/dados/')) {
             filePath = path.join(DADOS_DIR, path.basename(urlPath));
         }
@@ -111,7 +111,6 @@ const server = http.createServer(async (req, res) => {
             return res.end(fs.readFileSync(filePath));
         }
 
-        console.log(`[404] ${urlPath} -> ${filePath}`);
         res.writeHead(404);
         res.end('Arquivo nao encontrado');
 
